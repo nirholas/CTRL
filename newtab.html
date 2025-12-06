@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .search-box {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 15px 30px;
+            margin: 30px auto;
+            max-width: 600px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        
+        .shortcut {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .shortcut:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+        
+        .shortcut-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .shortcut-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LyraOS Browser</h1>
+        
+        <div class="search-box">
+            <input type="text" placeholder="Search or enter website URL..." id="searchInput">
+        </div>
+        
+        <div class="shortcuts">
+            <div class="shortcut" onclick="navigate('https://www.wikipedia.org')">
+                <div class="shortcut-icon">📖</div>
+                <div class="shortcut-name">Wikipedia</div>
+            </div>
+            <div class="shortcut" onclick="navigate('https://github.com')">
+                <div class="shortcut-icon">💻</div>
+                <div class="shortcut-name">GitHub</div>
+            </div>
+            <div class="shortcut" onclick="navigate('https://www.youtube.com')">
+                <div class="shortcut-icon">🎬</div>
+                <div class="shortcut-name">YouTube</div>
+            </div>
+            <div class="shortcut" onclick="navigate('https://stackoverflow.com')">
+                <div class="shortcut-icon">📚</div>
+                <div class="shortcut-name">Stack Overflow</div>
+            </div>
+        </div>
+        
+        <p style="opacity: 0.7; font-size: 14px; margin-top: 40px;">
+            Note: Some websites may block iframe embedding for security reasons.
+        </p>
+    </div>
+    
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const value = searchInput.value.trim();
+                if (value) {
+                    navigate(value);
+                }
+            }
+        });
+        
+        function navigate(url) {
+            // If not a full URL, add https://
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            // Try to navigate parent frame if in iframe, otherwise open in new tab
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'navigate', url: url }, '*');
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+</body>
+</html>
