@@ -4,7 +4,7 @@
 
 ## Get started
 
-* [Access LyraOS](get-started/access-novaos.md)
+* [Access LyraOS](get-started/access-lyraos.md)
 
 ## docs
 
@@ -24,7 +24,7 @@
 * [Standards](docs/standards/README.md)
   * [Error standards](docs/standards/error-standards.md)
 * [Networking](docs/networking/README.md)
-  * [Rotur In LyraOS](docs/networking/rotur-in-novaos.md)
+  * [Rotur In LyraOS](docs/networking/rotur-in-lyraos.md)
 
 ## ❓ How to
 
@@ -43,5 +43,4 @@
 
 * [Projects](more/projects.md)
 * [Feedback and suggest](more/feedback-and-suggest.md)
-* [❤️ Support LyraOS](more/support-novaos.md)
 * [Features](more/features.md)
