@@ -64,7 +64,7 @@ Get the file content with a path. This is an asynchronous function.
 Usage Example:
 
 ```js
-await novaos.getFileByPath(path)
+await lyraos.getFileByPath(path)
 ```
 
 * where `path` is the path of the file.
