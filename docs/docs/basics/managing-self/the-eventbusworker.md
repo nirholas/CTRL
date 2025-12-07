@@ -74,7 +74,7 @@ The settings event has this default syntax:
 ```
 
 {% hint style="info" %}
-Here is a list of all settings codes and how to get the values of them: [Settings Descriptions](https://github.com/adthoughtsglobal/Lyra-OS/wiki/Settings-Descriptions)
+Here is a list of all settings codes and how to get the values of them: [Settings Descriptions](https://github.com/nirholas/LyraOS/wiki/Settings-Descriptions)
 {% endhint %}
 
 #### Event titles
