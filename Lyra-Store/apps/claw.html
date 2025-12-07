@@ -846,7 +846,7 @@ refresh
                 const postTimestamp = document.createElement("div");
                 postTimestamp.classList.add("posttimestamp");
                 if (post.os) {
-                    if (post.os === "novaOS") {
+                    if (post.os === "lyraOS") {
                         postTimestamp.innerHTML = timeSince(post.timestamp) + " | Posted here";
                     } else {
                         postTimestamp.textContent = timeSince(post.timestamp) + " | Posted on " + post.os;
@@ -1023,7 +1023,7 @@ refresh
         async function likepost(id) {
             if (!checkifaccs()) { return }
             await fetch("https://claw.rotur.dev/rate?id=" + id + "&auth=" +
-                window.parent.roturExtension.userToken + "&rating=1&os=novaOS");
+                window.parent.roturExtension.userToken + "&rating=1&os=lyraOS");
             loadFeed()
         }
 
@@ -1031,7 +1031,7 @@ refresh
             if (!checkifaccs()) { return }
             let content = document.getElementById("postinput").value;
 
-            await fetch(`https://claw.rotur.dev/post?content=${content}&os=novaOS&auth=${window.parent.roturExtension.userToken}${attachments}`);
+            await fetch(`https://claw.rotur.dev/post?content=${content}&os=lyraOS&auth=${window.parent.roturExtension.userToken}${attachments}`);
 
             if (attachments) {
                 document.getElementById("attachbtn").innerHTML = `
@@ -1047,7 +1047,7 @@ refresh
         async function followuser() {
             if (!checkifaccs()) { return }
             let content = document.getElementById("postinput").value;
-            await fetch("https://claw.rotur.dev/post?content=" + content + "&os=novaOS&auth=" +
+            await fetch("https://claw.rotur.dev/post?content=" + content + "&os=lyraOS&auth=" +
                 window.parent.roturExtension.userToken);
         }
 
@@ -1215,14 +1215,14 @@ refresh
                 followbtntxt.innerHTML = "Unfollow";
                 followbtn.style.background = "#2f2f2f";
                 followbtn.onclick = async () => {
-                    await fetch("https://claw.rotur.dev/unfollow?username=" + name + "&os=novaOS&auth=" +
+                    await fetch("https://claw.rotur.dev/unfollow?username=" + name + "&os=lyraOS&auth=" +
                         window.parent.roturExtension.userToken);
                 }
             } else {
                 followbtntxt.innerHTML = "Follow";
                 followbtn.style.background = "#4e5fa7";
                 followbtn.onclick = async () => {
-                    await fetch("https://claw.rotur.dev/follow?username=" + name + "&os=novaOS&auth=" +
+                    await fetch("https://claw.rotur.dev/follow?username=" + name + "&os=lyraOS&auth=" +
                         window.parent.roturExtension.userToken);
                 }
             }
