@@ -1,13 +1,13 @@
 # Access LyraOS
 
-## [https://runnova.github.io/LyraOS/](https://adthoughtsglobal.github.io/Lyra-OS/)
+## [https://lyra.surf](https://lyra.surf)
 
 This is the website link for LyraOS for larger-screen devices.
 
 {% hint style="info" %}
 ## Facing any issues?
 
-Join our Discord for help, [here](https://discord.gg/NhC8N2Mxta).
+Send a message on X to [nich](https://x.com/nichxbt).
 {% endhint %}
 
 To use LyraOS in a mobile or a vertically screened device with a dynamic viewport, consider installing the OS as an app.
@@ -24,7 +24,7 @@ From your default OS.
 {% endstep %}
 
 {% step %}
-### Go to [runnova.github.io/LyraOS](https://adthoughtsglobal.github.io/Lyra-OS/)
+### Go to [lyra.surf](https://lyra.surf)
 
 and wait until LyraOS installs.
 
@@ -53,5 +53,5 @@ You now have your personal Web System ready to be used.
 {% hint style="info" %}
 ## Facing any issues?
 
-Join our Discord for help, [here](https://discord.gg/NhC8N2Mxta).
+Send a message on X [here](https://x.com/nichxbt).
 {% endhint %}
