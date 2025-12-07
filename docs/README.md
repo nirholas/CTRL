@@ -14,8 +14,6 @@ LyraOS is Open Source (GPL v3), but it does not merge pull requests.&#x20;
 
 You can eventually create your dream web apps that utilize an increased set of features right in LyraOS. It supports all modern devices. It has a fully self-contained ecosystem and a unique user experience.&#x20;
 
-[Try LyraOS now](get-started/access-novaos.md) if you haven't.
+[Try LyraOS now](get-started/access-lyraos.md) if you haven't.
 
 This documentation was formed over time, including answers to the most important questions you may be curious about. Starting from the basics of usage and behind-the-scenes design. Feel free to point out outdated content, errors, or documentation requirements at our Discord Server
-
-[Click here](https://adthoughtsglobal.github.io/screens/donate.html) if you wish to support LyraOS.
