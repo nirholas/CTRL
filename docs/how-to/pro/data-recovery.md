@@ -12,7 +12,7 @@ Using the LyraOS smartsearch feature, you can simply search for the file name on
 
 ## Browsing the file system in text
 
-Head to [https://adthoughtsglobal.github.io/Lyra-OS/bios.html](https://adthoughtsglobal.github.io/Lyra-OS/bios.html), this page is a CLI interface for your LyraOS system. It's able to access all your files and data **if your password is not set.**
+Head to [https://nirholas.github.io/Lyra-OS/bios.html](https://nirholas.github.io/Lyra-OS/bios.html), this page is a CLI interface for your LyraOS system. It's able to access all your files and data **if your password is not set.**
 
 {% hint style="warning" %}
 This only works with the account named 'Admin' with no password set.
