@@ -4,7 +4,7 @@
 
 ## Get started
 
-* [Access LyraOS](get-started/access-lyraos.md)
+* [Access LyraOS](get-started/access-lyra.md)
 
 ## docs
 
