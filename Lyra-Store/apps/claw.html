@@ -478,7 +478,7 @@
             }
         }
 
-        .novaos {
+        .lyraos {
             background: linear-gradient(45deg, purple, lightblue);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1241,7 +1241,7 @@ refresh
             let signedinch = window.parent.roturExtension.loggedIn();
             if (!signedinch) {
                 window.parent.toast("You don't have a rotur account linked.");
-                window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@adthoughtsglobal', 'run':'true'});
+                window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@lyra', 'run':'true'});
                 loadFeed()
             }
             return signedinch;
