@@ -1,9 +1,5 @@
-<img height="444" src="/n.png"/>
-
 # CTRL
 The open-source, stable, fully-local web desktop system, made for every modern browser and device.
-
-[Homepage](https://ctrl.surf/) | [Docs](https://CTRL.gitbook.io/CTRLos-docs) | [Discord](https://discord.gg/atkqbwEQU8) | [X](https://x.com/nichxbt)
 
 ```txt
 Version: 2.1
