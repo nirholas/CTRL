@@ -860,7 +860,53 @@
 			originalPutWinOnTop.call(window, windowId);
 			var el = document.getElementById(windowId);
 			if (el) el.classList.add('windowontop');
+
+			// Update taskbar active indicators (win12-style)
+			updateTaskbarIndicators(windowId);
 		};
+	}
+
+	/* ─────────── Taskbar Active Indicators (Win12-style) ─────────── */
+
+	function updateTaskbarIndicators(focusedWindowId) {
+		// Clear all active states
+		var navItems = document.querySelectorAll('[navobj]');
+		navItems.forEach(function (item) {
+			item.removeAttribute('data-active');
+		});
+
+		// Mark all open windows' taskbar icons as running
+		var openWindows = document.querySelectorAll('.window');
+		openWindows.forEach(function (win) {
+			var winId = win.id;
+			// Find corresponding taskbar item by matching app shortcut click handler
+			var navItem = findNavItemForWindow(winId);
+			if (navItem) {
+				navItem.setAttribute('data-running', 'true');
+			}
+		});
+
+		// Mark focused window's taskbar icon as active
+		if (focusedWindowId) {
+			var activeNav = findNavItemForWindow(focusedWindowId);
+			if (activeNav) {
+				activeNav.setAttribute('data-active', 'true');
+			}
+		}
+	}
+
+	function findNavItemForWindow(windowId) {
+		// Windows are named 'window' + uid, try to find matching navobj
+		var navItems = document.querySelectorAll('[navobj]');
+		for (var i = 0; i < navItems.length; i++) {
+			var item = navItems[i];
+			// Check if this nav item's unid attribute matches something related
+			var unid = item.getAttribute('unid') || '';
+			if (unid && windowId && windowId.indexOf(unid) !== -1) {
+				return item;
+			}
+		}
+		return null;
 	}
 
 	/* ─────────── Desktop Widget Auto-fade ─────────── */

@@ -161,9 +161,28 @@ async function checkdmode() {
 		ctrldotcsscache = await response.text();
 	}
 
+	// Apply light/dark mode preference (consistent with kernel.js toggleTheme/restoreTheme)
+	const mode = await getSetting("theme");
+	if (mode === "light") {
+		document.documentElement.classList.add("light-mode");
+	} else {
+		document.documentElement.classList.remove("light-mode");
+	}
+
 	if (CurrentUsername) {
 		const themeColors = await getSetting("themeColors") || {};
 		applyTheme(themeColors, document);
+	}
+}
+
+async function toggleDarkMode() {
+	const isLight = document.documentElement.classList.contains("light-mode");
+	if (isLight) {
+		document.documentElement.classList.remove("light-mode");
+		await setSetting("theme", "dark");
+	} else {
+		document.documentElement.classList.add("light-mode");
+		await setSetting("theme", "light");
 	}
 }
 

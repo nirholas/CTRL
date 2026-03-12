@@ -520,18 +520,27 @@ function clwin(x) {
 	const el = isElement(x) ? x : document.getElementById(x.startsWith("window") ? x : "window" + x);
 	const windKey = isElement(x) ? el.getAttribute("data-winuid") : x;
 	if (windKey) {
-		console.log(windKey)
-		URL.revokeObjectURL(winds[windKey].src)
+		URL.revokeObjectURL(winds[windKey].src);
 		delete winds[windKey];
 	}
-	loadtaskspanel()
+	loadtaskspanel();
 	if (!el) return;
 
-	el.classList.add("transp3");
+	// Win12 close pattern: remove .notrans → remove .show → wait transition → cleanup
+	el.classList.remove('notrans');
+	el.classList.remove('show');
 	setTimeout(() => {
-		el.classList.remove("transp3");
+		el.classList.remove('show-begin');
 		el.remove();
-	}, 700);
+		// Focus next window in stack
+		var remaining = Object.keys(winds);
+		if (remaining.length > 0) {
+			var topWinId = remaining.reduce(function(a, b) {
+				return (Number(winds[a].zIndex) || 0) > (Number(winds[b].zIndex) || 0) ? a : b;
+			});
+			putwinontop('window' + topWinId);
+		}
+	}, 250);
 }
 
 function getMetaTagContent(unshrunkContent, metaName, decode = false) {
@@ -659,20 +668,28 @@ async function fetchData(url) {
 var content;
 function putwinontop(x) {
 	Object.keys(winds).forEach(wid => {
-		if (gid(`window${wid}`).style.zIndex)
-			winds[wid].zIndex = Number(gid(`window${wid}`).style.zIndex || 0);
-		else
-			return;
+		const winEl = gid(`window${wid}`);
+		if (!winEl) return;
+		if (winEl.style.zIndex)
+			winds[wid].zIndex = Number(winEl.style.zIndex || 0);
+		// Remove focus class from all windows
+		winEl.classList.remove('windowontop');
 	});
+
+	const focusedEl = document.getElementById(x);
+	if (!focusedEl) return;
 
 	if (Object.keys(winds).length > 1) {
 		const windValues = Object.values(winds).map(wind => Number(wind.zIndex) || 0);
 		const maxWindValue = Math.max(...windValues);
-		document.getElementById(x).style.zIndex = maxWindValue + 1;
+		focusedEl.style.zIndex = maxWindValue + 1;
 		normalizeZIndexes(x);
 	} else {
-		document.getElementById(x).style.zIndex = 0;
+		focusedEl.style.zIndex = 0;
 	}
+
+	// Add focus class to the top window
+	focusedEl.classList.add('windowontop');
 	if (typeof updateFocusedWindowBorder === "function") updateFocusedWindowBorder();
 }
 function isWinOnTop(x) {
@@ -2150,6 +2167,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 	}
 
 	startfunctions();
+
+	// Restore theme preference after kernel.js is loaded
+	if (typeof restoreTheme === 'function') {
+		restoreTheme();
+	}
+
 	gid("ctrlnav").style.display = "none";
 	async function waitForNonNull() {
 		const startTime = Date.now();

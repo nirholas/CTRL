@@ -158,6 +158,11 @@ function attachDragHandler(windowDiv, header, winuid) {
         winds[winuid].zIndex = windowDiv.style.zIndex;
     });
 
+    header.addEventListener("dblclick", (e) => {
+        if (e.target.closest('.ibtnsside')) return;
+        flwin(windowDiv);
+    });
+
     dragElement(windowDiv);
 
     header.addEventListener("mouseup", (event) => {
@@ -267,7 +272,19 @@ function attachResizeHandlers(windowDiv) {
 
 function finalizeWindow(windowDiv, winuid) {
     document.body.appendChild(windowDiv);
-    console.log(windowDiv)
+
+    // Win12 show pattern: show-begin (display:flex) → next frame → show (opacity+transform)
+    windowDiv.classList.add('show-begin');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            windowDiv.classList.add('show');
+        });
+    });
+
+    // After transition completes, disable transitions for drag performance
+    setTimeout(() => {
+        windowDiv.classList.add('notrans');
+    }, 250);
 
     const zIndexes = Object.values(winds).map(w => Number(w.zIndex) || 0);
     const maxZ = Math.max(0, ...zIndexes);
@@ -278,38 +295,60 @@ function finalizeWindow(windowDiv, winuid) {
 
 function resetWindow(id) {
     const x = document.getElementById("window" + id);
-    x.classList.add("snapping");
+    x.classList.remove('notrans');
 
-    const aspectRatio = x.getAttribute("data-aspectratio") || "9/6";
-    const sizeStyles = calculateWindowSize(aspectRatio);
+    // Remove max class — CSS transition handles the animation
+    x.classList.remove("max");
 
-    Object.assign(x.style, sizeStyles);
-    x.getElementsByClassName("flbtn")[0].innerHTML = "open_in_full";
+    // Restore saved position if available (from maximize)
+    const savedLeft = x.getAttribute('data-pos-x');
+    const savedTop = x.getAttribute('data-pos-y');
+    const savedWidth = x.getAttribute('data-pos-w');
+    const savedHeight = x.getAttribute('data-pos-h');
 
+    if (savedLeft && savedTop && savedWidth && savedHeight) {
+        x.style.left = savedLeft;
+        x.style.top = savedTop;
+        x.style.width = savedWidth;
+        x.style.height = savedHeight;
+    } else {
+        const aspectRatio = x.getAttribute("data-aspectratio") || "9/6";
+        const sizeStyles = calculateWindowSize(aspectRatio);
+        Object.assign(x.style, sizeStyles);
+    }
+
+    const flbtn = x.getElementsByClassName("flbtn")[0];
+    if (flbtn) flbtn.innerHTML = "open_in_full";
     winds[id]["visualState"] = "free";
 
     setTimeout(() => {
-        x.classList.remove("snapping");
-    }, 1000);
+        x.classList.add('notrans');
+    }, 250);
 }
 
 function maximizeWindow(id) {
     updateNavSize();
     const x = document.getElementById("window" + id);
-   suppressNudge = true;
-x.classList.add("snapping");
-    x.style.width = "calc(100% - 0px)";
-    x.style.height = "calc(100% - " + navheight + "px)";
-    x.style.top = "0";
-    x.style.left = "0";
-    x.getElementsByClassName("flbtn")[0].innerHTML = "close_fullscreen";
 
+    // Save current position/size before maximizing
+    x.setAttribute('data-pos-x', x.style.left || x.offsetLeft + 'px');
+    x.setAttribute('data-pos-y', x.style.top || x.offsetTop + 'px');
+    x.setAttribute('data-pos-w', x.style.width || x.offsetWidth + 'px');
+    x.setAttribute('data-pos-h', x.style.height || x.offsetHeight + 'px');
+
+    suppressNudge = true;
+    x.classList.remove('notrans');
+    x.classList.add("max");
+    x.style.height = "calc(100% - " + navheight + "px)";
+
+    const flbtn = x.getElementsByClassName("flbtn")[0];
+    if (flbtn) flbtn.innerHTML = "close_fullscreen";
     winds[id]["visualState"] = "fullscreen";
 
     setTimeout(() => {
-    x.classList.remove("snapping");
-    suppressNudge = false;
-}, 1000);
+        x.classList.add('notrans');
+        suppressNudge = false;
+    }, 250);
 }
 
 let suppressNudge = false;
@@ -445,6 +484,7 @@ function dragElement(elmnt) {
         grabOffsetX = e.clientX - elmnt.getBoundingClientRect().left;
         grabOffsetY = e.clientY - elmnt.getBoundingClientRect().top;
         elmnt.style.position = 'absolute';
+        elmnt.classList.add('notrans');
 
         iframeOverlay = document.createElement('div');
         iframeOverlay.style.position = 'fixed';
@@ -488,6 +528,7 @@ function dragElement(elmnt) {
     function closeDragElement(e) {
         document.onmouseup = null;
         document.onmousemove = null;
+        elmnt.classList.remove('notrans');
 
         if (iframeOverlay) {
             document.body.removeChild(iframeOverlay);

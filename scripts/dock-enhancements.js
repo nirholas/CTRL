@@ -70,11 +70,10 @@
             groupDiv.dataset.winids = JSON.stringify(windowList.map(w => w.winuid));
             groupDiv.dataset.addedAt = performance.now();
 
-            // Click handler: 1 window → focus, multiple → show preview
+            // Click handler: 1 window → focus/minimize/restore, multiple → show preview
             groupDiv.addEventListener('click', () => {
                 const winids = JSON.parse(groupDiv.dataset.winids || '[]');
                 if (winids.length === 1) {
-                    putwinontop('window' + winids[0]);
                     minim(winids[0]);
                 } else if (winids.length > 1) {
                     showDockThumbnailPreview(groupDiv, appid, winids);

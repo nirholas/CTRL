@@ -32,9 +32,6 @@
 	<script src="scripts/previews.js" defer></script>
 	<script src="scripts/popout.js" defer></script>
 	<script src="scripts/os-enhancements.js" defer></script>
-	<script src="scripts/hotkeys.js" defer></script>
-	<script src="scripts/spotlight.js" defer></script>
-	<script src="scripts/terminal.js" defer></script>
 	<!--PWA Manifest-->
 	<link href="webmanifest.json" rel="manifest">
 	<!--Google Icons-->
@@ -190,6 +187,11 @@
 						</biv>
 					</your>
 					<info navobj>
+						<div class="navmalobj" onclick="toggleTheme()" style="cursor:pointer" title="Toggle dark/light mode">
+							<span id="theme-toggle-icon" class="material-symbols-rounded" style="font-size:18px">
+								dark_mode
+							</span>
+						</div>
 						<div id="batterydisdiv" class="navmalobj">
 							<span id="battery-p-display">
 							</span>

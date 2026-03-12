@@ -577,44 +577,60 @@ async function openapp(appTitle, external, customtodo, headless = false) {
 
 function minim(winuid) {
     const x = gid('window' + winuid);
+    if (!x) return;
 
     if (winds[winuid]["visualState"] === "minimized") {
-        x.style.display = "flex";
-        winds[winuid]["visualState"] = "free";
+        // Restore from minimized
+        x.classList.remove('notrans');
+        x.classList.add('restoring');
+        x.classList.remove('min');
+        winds[winuid]["visualState"] = winds[winuid]["preMinState"] || "free";
+        if (winds[winuid]["preMinState"] === "fullscreen") {
+            x.classList.add('min-max');
+            maximizeWindow(winuid);
+            x.classList.remove('min-max');
+        }
+        delete winds[winuid]["preMinState"];
+        putwinontop('window' + winuid);
+        setTimeout(() => {
+            x.classList.remove('restoring');
+            x.classList.add('notrans');
+        }, 350);
     } else {
         if (isWinOnTop('window' + winuid)) {
-            x.classList.add("transp4");
+            // Minimize the focused window
+            winds[winuid]["preMinState"] = winds[winuid]["visualState"];
             winds[winuid]["visualState"] = "minimized";
-
-            setTimeout(() => {
-                x.classList.remove("transp4");
-                x.style.display = "none";
-                nowapp = '';
-            }, 100);
+            x.classList.remove('notrans');
+            x.classList.add('min');
+            nowapp = '';
         } else {
+            // Not on top — just focus it
             putwinontop('window' + winuid);
         }
     }
 }
 
 function flwin(winElement) {
-    winElement.classList.add("transp2");
     const winuid = winElement.getAttribute("data-winuid");
     const flbtn = winElement.getElementsByClassName("flbtn")[0];
 
     const isFree = winds[winuid]["visualState"] != "fullscreen";
 
     if (isFree) {
+        // Save position before maximize
+        winds[winuid]._savedPos = {
+            left: winElement.style.left,
+            top: winElement.style.top,
+            width: winElement.style.width,
+            height: winElement.style.height
+        };
         maximizeWindow(winuid);
         flbtn.innerHTML = "close_fullscreen";
     } else {
         resetWindow(winuid);
         flbtn.innerHTML = "open_in_full";
     }
-
-    setTimeout(() => {
-        winElement.classList.remove("transp2");
-    }, 1000);
 }
 
 async function safeRemoveApp(id) {
@@ -626,6 +642,44 @@ async function safeRemoveApp(id) {
     } catch (error) {
         console.error("Error removing app:", error);
         return false;
+    }
+}
+
+/* ── Dark / Light Mode Toggle ── */
+function toggleTheme() {
+    var root = document.documentElement;
+    var isLight = root.classList.contains('light-mode');
+    var icon = document.getElementById('theme-toggle-icon');
+    if (isLight) {
+        root.classList.remove('light-mode');
+        setSetting('theme', 'dark');
+        if (icon) icon.textContent = 'dark_mode';
+    } else {
+        root.classList.add('light-mode');
+        setSetting('theme', 'light');
+        if (icon) icon.textContent = 'light_mode';
+    }
+    // Notify iframes about theme change
+    document.querySelectorAll('.windowcontent iframe').forEach(function(frame) {
+        try {
+            frame.contentWindow.postMessage({ type: 'ctrl-theme-change', theme: isLight ? 'dark' : 'light' }, '*');
+        } catch (e) { /* cross-origin, ignore */ }
+    });
+}
+
+async function restoreTheme() {
+    var savedTheme = await getSetting('theme');
+    var icon = document.getElementById('theme-toggle-icon');
+    if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        if (icon) icon.textContent = 'light_mode';
+    } else if (!savedTheme) {
+        // Auto-detect from system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light-mode');
+            setSetting('theme', 'light');
+            if (icon) icon.textContent = 'light_mode';
+        }
     }
 }
 
