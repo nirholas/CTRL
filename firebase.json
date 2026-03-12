@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": ["firebase.json", "**/.*", "docs/**", "README.md"],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|svg|png|woff2)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=600" }
+        ]
+      },
+      {
+        "source": "CTRL-Store/db/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=300" }
+        ]
+      }
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}

@@ -1,90 +1,93 @@
-const CACHE_NAME = 'app-cache-v2';
-const urlsToCache = [
+// Cache names with version for cache busting
+const SHELL_CACHE = 'CTRL-shell-v2';
+const DATA_CACHE = 'CTRL-data-v1';
+
+// App shell — cache on install, serve from cache
+const SHELL_ASSETS = [
   '/',
   '/index.html',
-  'https://cdn.jsdelivr.net/npm/mime-db@1.52.0/db.json',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap',
-  '/system32.js',
+  '/script.js',
   '/style.css',
-  '/ctrl.png',
   '/ctrl.css',
-  '/libs/MaterialSymbolsRounded.woff2',
+  '/ctrl.js',
+  '/system32.js',
+  '/scripts/kernel.js',
+  '/scripts/utility.js',
   '/scripts/edgecases.js',
   '/scripts/scripties.js',
-  '/script.js',
   '/scripts/fflate.js',
-  '/scripts/kernel.js',
   '/scripts/readwrite.js',
-  '/scripts/utility.js',
   '/scripts/ctxmenu.js',
   '/scripts/os-enhancements.js',
+  '/libs/MaterialSymbolsRounded.woff2',
 ];
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-      caches.open(CACHE_NAME)
-        .then((cache) => {
-          return cache.addAll(urlsToCache)
-            .catch((error) => {
-              console.error('Failed to cache some resources:', error);
-              return Promise.all(urlsToCache.map(url => {
-                return cache.add(url).catch(err => console.error('Failed to cache', url, err));
-              }));
-            });
-        })
-    );
-  });
-  
+  event.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then((cache) => cache.addAll(SHELL_ASSETS))
+      .then(() => self.skipWaiting())
+  );
+});
 
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter((name) => name !== SHELL_CACHE && name !== DATA_CACHE)
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  // Domain redirect
   if (url.hostname === 'ctrl.surf') {
     url.hostname = 'ctrl.best';
     event.respondWith(Response.redirect(url.href, 301));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // If there is a cached response, return it.
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+  // App shell: cache-first
+  if (SHELL_ASSETS.some((asset) => url.pathname === asset || url.pathname.endsWith(asset))) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => cached || fetch(event.request))
+    );
+    return;
+  }
 
-        // Otherwise, fetch from the network.
-        return fetch(event.request)
-          .then((response) => {
-            // Check if we got a valid response.
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
+  // Store data (v2.json, themes.json): network-first with cache fallback
+  if (url.pathname.includes('CTRL-Store/db/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(DATA_CACHE).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
-            // Clone the response to ensure it's usable multiple times.
-            const responseToCache = response.clone();
+  // App HTML files: network-first with cache fallback
+  if (url.pathname.startsWith('/appdata/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(DATA_CACHE).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          });
-      })
-  );
+  // Everything else: network with cache fallback
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
