@@ -13,11 +13,11 @@
     }
   ],
     "display_override": ["fullscreen", "standalone", "minimal-ui", "browser"],
-    "scope": "https://ctrl.surf/",
-    "start_url": "https://ctrl.surf/",
+    "scope": "https://ctrl.best/",
+    "start_url": "https://ctrl.best/",
     "icons": [
         {
-            "src": "n.png",
+            "src": "ctrl.png",
             "sizes": "512x512",
             "type": "image/png"
         }

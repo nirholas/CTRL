@@ -6,7 +6,7 @@ const urlsToCache = [
   'https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap',
   '/system32.js',
   '/style.css',
-  '/n.png',
+  '/ctrl.png',
   '/ctrl.css',
   '/scripts/edgecases.js',
   '/scripts/scripties.js',
