@@ -1,6 +1,6 @@
 # Access CTRL
 
-## [https://ctrl.surf](https://ctrl.surf)
+## [https://ctrl.best](https://ctrl.best)
 
 This is the website link for CTRL for larger-screen devices.
 
@@ -18,7 +18,7 @@ Chrome, or its alternatives like Edge, Opera, have mostly the same methods.
 
 From your default OS.
 
-### Go to [ctrl.surf](https://ctrl.surf)
+### Go to [ctrl.best](https://ctrl.best)
 
 and wait until CTRL installs.
 

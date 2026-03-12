@@ -1,3 +1,6 @@
+if (location.hostname === 'ctrl.surf') {
+	location.replace('https://ctrl.best' + location.pathname + location.search + location.hash);
+}
 var batteryLevel, winds = {}, memory = {}, _nowapp, fulsapp = false, appsHistory = [], nowwindow, appicns = {}, fileslist = [], badlaunch = false, initmenuload = true, fileTypeAssociations = {}, handlers = {}, Gtodo, notifLog = {}, initialization = false, onstartup = [], ctrlFeaturedImage = `Dev.png`, defAppsList = [
 	"store",
 	"files",

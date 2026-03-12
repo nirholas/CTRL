@@ -1,4 +1,4 @@
-const CACHE_NAME = 'app-cache-v1';
+const CACHE_NAME = 'app-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const urlsToCache = [
   '/style.css',
   '/ctrl.png',
   '/ctrl.css',
+  '/libs/MaterialSymbolsRounded.woff2',
   '/scripts/edgecases.js',
   '/scripts/scripties.js',
   '/script.js',
@@ -16,6 +17,7 @@ const urlsToCache = [
   '/scripts/readwrite.js',
   '/scripts/utility.js',
   '/scripts/ctxmenu.js',
+  '/scripts/os-enhancements.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -50,6 +52,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (url.hostname === 'ctrl.surf') {
+    url.hostname = 'ctrl.best';
+    event.respondWith(Response.redirect(url.href, 301));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {

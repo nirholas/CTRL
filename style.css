@@ -110,6 +110,8 @@ nav [navobj] {
 	padding: 3px;
 	border-radius: var(--siz-radius1);
 	background-color: var(--col-bg1);
+	backdrop-filter: blur(24px) saturate(1.8);
+	-webkit-backdrop-filter: blur(24px) saturate(1.8);
 	display: flex;
 	justify-content: center;
 	gap: 3px;
@@ -2919,12 +2921,10 @@ dialog#nich {
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Taskbar glass */
+/* Taskbar — keep transparent so only [navobj] pills are visible */
 #ctrlnav {
-	backdrop-filter: blur(24px) saturate(1.8);
-	-webkit-backdrop-filter: blur(24px) saturate(1.8);
-	background: rgba(18, 18, 36, 0.7) !important;
-	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	background: transparent !important;
+	border-top: none;
 }
 
 /* Context menu glass */

@@ -149,7 +149,7 @@ async function getdb() {
 
     return new Promise((resolve, reject) => {
         request.onsuccess = () => {
-            memory = request.result ? request.result.memory : null;
+            memory = request.result?.memory ?? { root: {} };
             resolve(memory);
         };
         request.onerror = () => reject(request.error);

@@ -2020,7 +2020,7 @@ function _spotlightExecuteActive() {
 // Fetch store catalog for search (cached)
 function _spotlightFetchStore() {
 	try {
-		fetch('CTRL-Store/db/v2.json')
+		fetch('https://ctrl.best/CTRL-Store/db/v2.json')
 			.then(function (r) { return r.json(); })
 			.then(function (data) {
 				if (Array.isArray(data)) {

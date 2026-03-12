@@ -1674,7 +1674,7 @@
 		async function greenflag() {
 			const data = myWindow?.params?.data?.opener;
 
-			prepareAppData();
+			prepareAppData().catch(err => console.warn('Store: prepareAppData failed, renderapps will handle:', err));
 			console.log("23", 34, myWindow?.params)
 			if (data == 'themes') {
 				loadThemes();
