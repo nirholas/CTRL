@@ -1146,9 +1146,10 @@ tab.navHistory.push(url);
 tab.historyIndex = tab.navHistory.length - 1;
 
 var panel = document.getElementById("panel_" + tab.id);
+releaseIframesInPanel(panel);
 panel.innerHTML = "";
 
-var iframe = document.createElement("iframe");
+var iframe = acquireIframe();
 iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation");
 iframe.setAttribute("allowtransparency", "true");
 iframe.setAttribute("referrerpolicy", "no-referrer");
@@ -1161,6 +1162,8 @@ tab.title = iframe.contentDocument.title;
 }
 } catch (_) {}
 addToHistory(tab.url, tab.title);
+syncWindowTitle(tab);
+saveSession();
 renderTabs();
 updateNavButtons();
 updateAddressBar();
@@ -1202,6 +1205,8 @@ activeTabId = id;
 document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
 var panel = document.getElementById("panel_" + id);
 if (panel) panel.classList.add("active");
+var tab = getActiveTab();
+if (tab) syncWindowTitle(tab);
 renderTabs();
 updateAddressBar();
 updateNavButtons();
@@ -1212,8 +1217,12 @@ function closeTab(id) {
 var idx = tabs.findIndex(function(t) { return t.id === id; });
 if (idx < 0) return;
 var panel = document.getElementById("panel_" + id);
-if (panel) panel.remove();
+if (panel) {
+releaseIframesInPanel(panel);
+panel.remove();
+}
 tabs.splice(idx, 1);
+saveSession();
 if (tabs.length === 0) { newTab(); return; }
 if (activeTabId === id) {
 var newIdx = Math.min(idx, tabs.length - 1);
@@ -1348,13 +1357,16 @@ tab.url = url;
 tab.isNewTab = false;
 tab.loading = true;
 var panel = document.getElementById("panel_" + tab.id);
+releaseIframesInPanel(panel);
 panel.innerHTML = "";
-var iframe = document.createElement("iframe");
+var iframe = acquireIframe();
 iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation");
 iframe.setAttribute("referrerpolicy", "no-referrer");
 iframe.onload = function() {
 tab.loading = false;
 try { if (iframe.contentDocument && iframe.contentDocument.title) tab.title = iframe.contentDocument.title; } catch (_) {}
+syncWindowTitle(tab);
+saveSession();
 renderTabs();
 updateNavButtons();
 updateAddressBar();
@@ -1551,6 +1563,55 @@ newTab(text);
 }
 });
 
+// ── IframePool helpers ──
+function acquireIframe() {
+try {
+if (window.parent && window.parent.IframePool) return window.parent.IframePool.acquire();
+} catch (_) {}
+var iframe = document.createElement("iframe");
+iframe.style.width = "100%";
+iframe.style.height = "100%";
+iframe.style.border = "none";
+return iframe;
+}
+
+function releaseIframesInPanel(panel) {
+if (!panel) return;
+var iframes = panel.querySelectorAll("iframe");
+iframes.forEach(function(iframe) {
+try {
+var src = iframe.src;
+if (src && src.startsWith("blob:")) URL.revokeObjectURL(src);
+} catch (_) {}
+try {
+if (window.parent && window.parent.IframePool) { window.parent.IframePool.release(iframe); return; }
+} catch (_) {}
+try { iframe.src = "about:blank"; } catch (_) {}
+});
+}
+
+// ── Window title sync ──
+function syncWindowTitle(tab) {
+try {
+if (myWindow && typeof myWindow.setTitle === "function") {
+myWindow.setTitle(tab.title || "Browser");
+}
+} catch (_) {}
+}
+
+// ── Tab session save/restore ──
+function saveSession() {
+var sessionData = tabs.filter(function(t) { return !t.isNewTab && t.url; }).map(function(t) { return { url: t.url, title: t.title }; });
+saveData("session", sessionData);
+}
+
+async function restoreSession() {
+var session = await loadData("session", []);
+if (!session || session.length === 0) return false;
+session.forEach(function(s) { newTab(s.url); });
+return true;
+}
+
 // ── Utilities ──
 function escapeHtml(str) {
 if (!str) return "";
@@ -1597,7 +1658,10 @@ launched = true;
 }
 } catch (_) {}
 
-if (!launched) newTab();
+if (!launched) {
+var restored = await restoreSession();
+if (!restored) newTab();
+}
 }
 
 return {

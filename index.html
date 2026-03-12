@@ -13,6 +13,7 @@
 	<!--CTRL scripts-->
 	<script src="scripts/utility.js"></script>
 	<script src="script.js" defer></script>
+	<script src="scripts/os-features.js" defer></script>
 	<!--PWA Manifest-->
 	<link href="webmanifest.json" rel="manifest">
 	<!--Google Icons-->
@@ -423,6 +424,21 @@
 		<h1 id="nich-title">Nich</h1>
 		<span>CTRL is being installed...</span>
 	</dialog>
+
+	<!-- Mission Control overlay -->
+	<div id="mission-control" class="mission-control" hidden>
+		<div id="mc-windows-grid" class="mc-windows-grid"></div>
+	</div>
+
+	<!-- Notification Center panel -->
+	<div id="notification-center" class="notification-center" hidden>
+		<h2>Notifications</h2>
+		<ul id="nc-list" class="nc-list"></ul>
+		<p id="nc-empty" class="nc-empty">No notifications</p>
+	</div>
+
+	<!-- Show Desktop button (appended to taskbar by os-features.js) -->
+	<div id="showDesktopBtn" class="show-desktop-btn" title="Show Desktop"></div>
 </body>
 
 </html>
