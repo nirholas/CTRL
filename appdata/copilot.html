@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sperax DeFi Copilot</title>
-    <meta name="lyra-icon" content="../assets/logo.svg">
+    <meta name="ctrl-icon" content="../assets/logo.svg">
     <meta name="permissions" content="unsandboxed">
     <style>
         * {
@@ -78,13 +78,13 @@
             frame.classList.add('loaded');
         });
         
-        // Optional: Message passing between LyraOS and Sperax DeFi Copilot
+        // Optional: Message passing between CTRL and Sperax DeFi Copilot
         window.addEventListener('message', (event) => {
             // Handle messages from Sperax DeFi Copilot iframe
             if (event.origin === 'https://sperax.space') {
                 console.log('Message from Sperax DeFi Copilot:', event.data);
                 
-                // Could trigger LyraOS actions, e.g.:
+                // Could trigger CTRL actions, e.g.:
                 // if (event.data.action === 'openFile') {
                 //     window.parent.openFileDialog();
                 // }
@@ -96,7 +96,7 @@
             frame.contentWindow.postMessage(message, 'https://sperax.space');
         }
         
-        // Make available globally for other LyraOS apps
+        // Make available globally for other CTRL apps
         window.sendToChat = sendToChat;
     </script>
 </body>

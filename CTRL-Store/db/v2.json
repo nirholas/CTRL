@@ -16,23 +16,23 @@
   ],
   "apps": [
     {
-      "name": "Lyra CLI",
-      "src": "/Lyra-Store/apps/cli.html",
+      "name": "CTRL CLI",
+      "src": "/CTRL-Store/apps/cli.html",
       "by": "nich",
       "qt": "Explore more inside",
-      "desc": "System CLI for Lyra OS",
+      "desc": "System CLI for CTRL",
       "cat": "tools",
       "ver": "1",
-      "ldesc": "Access Lyra System directly with Lyra CLI, read and write files, execute functions and return data.",
+      "ldesc": "Access CTRL System directly with CTRL CLI, read and write files, execute functions and return data.",
       "symbol": "terminal",
       "th": "#5FFCA6"
     },
     {
-      "name": "LyraOS Claw",
-      "src": "/Lyra-Store/apps/claw.html",
+      "name": "CTRL Claw",
+      "src": "/CTRL-Store/apps/claw.html",
       "by": "nich",
       "qt": "Online social client",
-      "desc": "Rotur Claw LyraOS Client",
+      "desc": "Rotur Claw CTRL Client",
       "cat": "rotur",
       "ver": "1",
       "ldesc": "Read the Claw feed or become a part in the conversation. Now with attatchments.",
@@ -41,7 +41,7 @@
     },
     {
       "name": "Data manager",
-      "src": "/Lyra-Store/apps/datamgr.html",
+      "src": "/CTRL-Store/apps/datamgr.html",
       "by": "nich",
       "qt": "Dig and replace",
       "desc": "Manage data in local storage",
@@ -53,7 +53,7 @@
     },
     {
       "name": "Rubix Timer",
-      "src": "/Lyra-Store/apps/rubixtimer.html",
+      "src": "/CTRL-Store/apps/rubixtimer.html",
       "by": "nich",
       "qt": "Measure your scores",
       "desc": "Full Rubiks cube timer with scramble.",
@@ -65,7 +65,7 @@
     },
     {
       "name": "Owi Five",
-      "src": "/Lyra-Store/apps/owifive.html",
+      "src": "/CTRL-Store/apps/owifive.html",
       "by": "nich",
       "qt": "Investigate that image",
       "desc": "A tool to dig in details and alter image contents.",
@@ -77,19 +77,19 @@
     },
     {
       "name": "Textame",
-      "src": "/Lyra-Store/apps/textame.html",
+      "src": "/CTRL-Store/apps/textame.html",
       "by": "nich",
       "qt": "Explore more inside",
       "desc": "Create Text and html files",
       "cat": "text editor",
       "ver": "1",
-      "ldesc": "Create formatted HTML files without code. Text editor for rich text editing in LyraOS.",
+      "ldesc": "Create formatted HTML files without code. Text editor for rich text editing in CTRL.",
       "symbol": "rtt",
       "th": "#ffffff"
     },
     {
       "name": "Artion",
-      "src": "/Lyra-Store/apps/paintviz.html",
+      "src": "/CTRL-Store/apps/paintviz.html",
       "by": "Vizronix",
       "qt": "Get creative",
       "desc": "A sophisticated web application for drawing",
@@ -101,7 +101,7 @@
     },
     {
       "name": "Ducks Quack",
-      "src": "/Lyra-Store/apps/ducksquack.html",
+      "src": "/CTRL-Store/apps/ducksquack.html",
       "by": "nich",
       "qt": "Ensure Ducks Quack",
       "desc": "Pictures of ducks for all. To ensure global peace.",
@@ -113,7 +113,7 @@
     },
     {
       "name": "WCanvas2",
-      "src": "/Lyra-Store/apps/WCanvas.html",
+      "src": "/CTRL-Store/apps/WCanvas.html",
       "by": "nich",
       "qt": "Create Anything.",
       "desc": "An full HTML, Python, OSL code editor.",
@@ -125,7 +125,7 @@
     },
     {
       "name": "Lizabot3",
-      "src": "/Lyra-Store/apps/lizabot3.html",
+      "src": "/CTRL-Store/apps/lizabot3.html",
       "by": "nich",
       "qt": "A personal Chatbot",
       "desc": "A personal Chatbot that don't hallucinate",
@@ -137,7 +137,7 @@
     },
     {
       "name": "OriginOS Access",
-      "src": "/Lyra-Store/apps/originAccess.html",
+      "src": "/CTRL-Store/apps/originAccess.html",
       "by": "Mistium",
       "qt": "Run Origin OS",
       "desc": "The best GUI for OSL and OASM.",
@@ -161,7 +161,7 @@
     },
     {
       "name": "Dot Engine",
-      "src": "/Lyra-Store/apps/dotengine.html",
+      "src": "/CTRL-Store/apps/dotengine.html",
       "by": "nich",
       "qt": "Mini beat maker",
       "desc": "Minimal beat editor tool with waveform editing.",
@@ -173,7 +173,7 @@
     },
     {
       "name": "JSON Editor",
-      "src": "/Lyra-Store/apps/json.html",
+      "src": "/CTRL-Store/apps/json.html",
       "by": "nich",
       "qt": "Dive deeper in data",
       "desc": "Interactive and responsive editor for JSON files. Stable.",
@@ -184,11 +184,11 @@
     },
     {
       "name": "PDF Viewer",
-      "src": "/Lyra-Store/apps/pdfviewer.html",
+      "src": "/CTRL-Store/apps/pdfviewer.html",
       "by": "nich",
       "qt": "Facts never die, PDFs too.",
       "desc": "View PDFs with ease.",
-      "ldesc": "An app that let's you open PDFs in LyraOS using your browser's PDF environment.",
+      "ldesc": "An app that let's you open PDFs in CTRL using your browser's PDF environment.",
       "cat": "tools",
       "ver": "1.1",
       "symbol": "picture_as_pdf",
@@ -196,7 +196,7 @@
     },
     {
       "name": "Bad Things",
-      "src": "/Lyra-Store/apps/badthings.html",
+      "src": "/CTRL-Store/apps/badthings.html",
       "by": "nich",
       "qt": "Things get bad.",
       "desc": "Interactive endless game where losing is fatal.",
@@ -208,18 +208,18 @@
     },
     {
       "name": "Minecraft Launcher",
-      "src": "/Lyra-Store/apps/nvamine.html",
+      "src": "/CTRL-Store/apps/nvamine.html",
       "by": "nich",
       "qt": "Sculpt or destroy.",
       "desc": "Play minecraft clones",
       "cat": "launcher",
-      "ldesc": "Minecraft launcher in LyraOS is a way to play different minecraft web clones.",
+      "ldesc": "Minecraft launcher in CTRL is a way to play different minecraft web clones.",
       "symbol": "deployed_code",
       "th": "#093b3a"
     },
     {
       "name": "Obamafy",
-      "src": "/Lyra-Store/apps/obamafy.html",
+      "src": "/CTRL-Store/apps/obamafy.html",
       "by": "nich",
       "qt": "obama",
       "desc": "If it exists, theres obama of it.",
@@ -230,7 +230,7 @@
     },
     {
       "name": "Tic Tac Toe",
-      "src": "/Lyra-Store/apps/TicTacToe.html",
+      "src": "/CTRL-Store/apps/TicTacToe.html",
       "by": "G-Progress",
       "qt": "Play offline",
       "desc": "The game Of TicTacToe.",

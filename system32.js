@@ -1,6 +1,6 @@
 
 var CurrentUsername = 'Admin';
-var password = "lyra";
+var password = "ctrl";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 var lethalpasswordtimes = true;
@@ -86,7 +86,7 @@ async function removeUser(username = CurrentUsername) {
         const deleteRequest = indexedDB.deleteDatabase(username);
         deleteRequest.onsuccess = function () {
             console.log(`Database for user ${username} deleted successfully.`);
-            logoutoflyra();
+            logoutofctrl();
         };
         deleteRequest.onerror = function (event) {
             console.error(`Error deleting database for user ${username}:`, event.target.error);
@@ -1173,7 +1173,7 @@ async function crashScreen(err) {
     closeallwindows();
     await say(`
         <h1>Your System is curropt.</h1>
-        <p>Reload your lyraOS to continue.<p>
+        <p>Reload your ctrl to continue.<p>
         <code>${err}</code>
         `, "failed");
     if (badlaunch) { return }

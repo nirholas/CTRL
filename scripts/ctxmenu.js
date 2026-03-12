@@ -100,8 +100,8 @@ async function getMenuItems(target) {
 	
 	if (target.id === 'desktop') {
 		return [
-			{ icon: 'refresh', label: 'Refresh homescreen', action: () => lyrarefresh() },
-			{ icon: 'power', label: 'Lyra setup', action: () => launchbios() },
+			{ icon: 'refresh', label: 'Refresh homescreen', action: () => ctrlrefresh() },
+			{ icon: 'power', label: 'CTRL setup', action: () => launchbios() },
 		];
 	}
 	if (target.classList.contains('windowheader')) {

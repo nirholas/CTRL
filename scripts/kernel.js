@@ -1,6 +1,6 @@
 var dragging = false, remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize), navheight;
 
-var lyradotcsscache, transactionLib = [], notificationContext = {};
+var ctrldotcsscache, transactionLib = [], notificationContext = {};
 
 async function openlaunchprotocol(appid, data, id, winuid) {
     sysLog("OLP", `Opening "${data}" in "${appid}" for ${winuid || id || 'operation'}`);
@@ -278,18 +278,18 @@ async function prepareIframeContent(cont, appid, winuid) {
     let contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
 
     let styleBlock = '';
-    if (getMetaTagContent(contentString, 'lyra-include')?.includes('lyra.css')) {
-        let updatedCss = lyradotcsscache || '';
-        const lyraCssTag = document.getElementById('lyracsstag');
-        if (lyraCssTag) {
-            const customCss = lyraCssTag.textContent;
+    if (getMetaTagContent(contentString, 'ctrl-include')?.includes('ctrl.css')) {
+        let updatedCss = ctrldotcsscache || '';
+        const ctrlCssTag = document.getElementById('ctrlcsstag');
+        if (ctrlCssTag) {
+            const customCss = ctrlCssTag.textContent;
             const variableRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
             let customVariables = {};
             let match;
             while ((match = variableRegex.exec(customCss)) !== null) {
                 customVariables[`--${match[1]}`] = match[2].trim();
             }
-            updatedCss = lyradotcsscache.replace(/:root\s*{([^}]*)}/, (match, declarations) => {
+            updatedCss = ctrldotcsscache.replace(/:root\s*{([^}]*)}/, (match, declarations) => {
                 let updated = declarations.trim();
                 for (const [key, val] of Object.entries(customVariables)) {
                     const regex = new RegExp(`(${key}\\s*:\\s*).*?;`, 'g');
@@ -318,13 +318,13 @@ async function prepareIframeContent(cont, appid, winuid) {
         }
     }
 
-    if (getMetaTagContent(contentString, 'lyra-include')?.includes('material-symbols-rounded')) {
-        const fontUrl = 'https://lyra.surf/libs/MaterialSymbolsRounded.woff2';
+    if (getMetaTagContent(contentString, 'ctrl-include')?.includes('material-symbols-rounded')) {
+        const fontUrl = 'https://ctrl.surf/libs/MaterialSymbolsRounded.woff2';
         cacheFont(fontUrl, 'material-symbols-rounded');
         styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontUrl}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
     }
 
-    const ctxScript = getMetaTagContent(contentString, 'lyra-include')?.includes('contextMenu') ? await fetch('scripts/ctxmenu.js').then(res => res.text()) : '';
+    const ctxScript = getMetaTagContent(contentString, 'ctrl-include')?.includes('contextMenu') ? await fetch('scripts/ctxmenu.js').then(res => res.text()) : '';
 
     const ntxScript = `<script defer>
 document.addEventListener('mousedown', () => {
@@ -344,11 +344,11 @@ window.addEventListener("message", async e => {
             await greenflag();
         } catch (t) {}
         window.parent.postMessage({ data: "gfdone", iframeId: myWindow.windowID }, "*");
-    } else if (e.data?.type === "lyra-style" && typeof e.data.css === "string") {
-        let styleTag = document.getElementById("lyracsstag");
+    } else if (e.data?.type === "ctrl-style" && typeof e.data.css === "string") {
+        let styleTag = document.getElementById("ctrlcsstag");
         if (!styleTag) {
             styleTag = document.createElement("style");
-            styleTag.id = "lyracsstag";
+            styleTag.id = "ctrlcsstag";
             document.head.appendChild(styleTag);
         }
         styleTag.textContent = e.data.css;

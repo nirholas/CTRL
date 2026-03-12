@@ -1,20 +1,20 @@
 {
     "manifest_version": 3,
-    "name": "LyraOS",
-    "short_name": "LyraOS",
-    "description": "LyraOS is a powerful web operating system built for everything. From daily tasks to endless fun, it has got you covered.",
+    "name": "CTRL",
+    "short_name": "CTRL",
+    "description": "CTRL is a powerful web operating system built for everything. From daily tasks to endless fun, it has got you covered.",
     "theme_color": "#fff",
     "background_color": "#fff",
     "display": "standalone",
     "protocol_handlers": [
     {
-      "protocol": "web+lyra",
+      "protocol": "web+ctrl",
       "url": "/?path=%s"
     }
   ],
     "display_override": ["fullscreen", "standalone", "minimal-ui", "browser"],
-    "scope": "https://lyra.surf/",
-    "start_url": "https://lyra.surf/",
+    "scope": "https://ctrl.surf/",
+    "start_url": "https://ctrl.surf/",
     "icons": [
         {
             "src": "n.png",

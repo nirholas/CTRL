@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>Lyra OS Claw</title>
-    <meta name="lyra-include" content="lyra.css material-symbols-rounded">
+    <title>CTRL Claw</title>
+    <meta name="ctrl-include" content="ctrl.css material-symbols-rounded">
 	<meta name="permissions" content="unsandboxed">
     <link rel="stylesheet" href="style.css">
-    <meta name="lyra-icon"
+    <meta name="ctrl-icon"
         content="<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='101.95947' height='96.90546' viewBox='0,0,101.95947,96.90546'><defs><linearGradient x1='240' y1='131.54727' x2='240' y2='228.45273' gradientUnits='userSpaceOnUse' id='color-dsfgsgsgsdgs'><stop offset='0' stop-color='#fff5c6'/><stop offset='1' stop-color='#ffd57e'/></linearGradient></defs><g transform='translate(-189.02026,-131.54727)'><g fill='url(#color-dsfgsgsgsdgs)' stroke='none' stroke-width='none' stroke-miterlimit='10'><path d='M189.02027,228.45273c0,0 11.43863,-109.70203 78.82693,-95.66469c15.91347,3.31486 27.61431,28.45432 21.46701,43.50216c-6.70161,16.40474 -16.55144,15.97346 -32.71778,14.27743c-30.58479,-3.2087 -67.57616,37.8851 -67.57616,37.8851z'/></g></g></svg>">
     </script>
     <style>
@@ -478,7 +478,7 @@
             }
         }
 
-        .lyraos {
+        .ctrl {
             background: linear-gradient(45deg, purple, lightblue);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -643,7 +643,7 @@
             <nav id="nav">
                 <div class="feedswitcher">
                     <span class="logo">
-                        LyraOS
+                        CTRL
                     </span>
                     <div class="feedsnav">
                         <button class="active" id="clawfeedbtn" onclick="loadFeed('claw', this)">
@@ -846,7 +846,7 @@ refresh
                 const postTimestamp = document.createElement("div");
                 postTimestamp.classList.add("posttimestamp");
                 if (post.os) {
-                    if (post.os === "lyraOS") {
+                    if (post.os === "ctrl") {
                         postTimestamp.innerHTML = timeSince(post.timestamp) + " | Posted here";
                     } else {
                         postTimestamp.textContent = timeSince(post.timestamp) + " | Posted on " + post.os;
@@ -1023,7 +1023,7 @@ refresh
         async function likepost(id) {
             if (!checkifaccs()) { return }
             await fetch("https://claw.rotur.dev/rate?id=" + id + "&auth=" +
-                window.parent.roturExtension.userToken + "&rating=1&os=lyraOS");
+                window.parent.roturExtension.userToken + "&rating=1&os=ctrl");
             loadFeed()
         }
 
@@ -1031,7 +1031,7 @@ refresh
             if (!checkifaccs()) { return }
             let content = document.getElementById("postinput").value;
 
-            await fetch(`https://claw.rotur.dev/post?content=${content}&os=lyraOS&auth=${window.parent.roturExtension.userToken}${attachments}`);
+            await fetch(`https://claw.rotur.dev/post?content=${content}&os=ctrl&auth=${window.parent.roturExtension.userToken}${attachments}`);
 
             if (attachments) {
                 document.getElementById("attachbtn").innerHTML = `
@@ -1047,7 +1047,7 @@ refresh
         async function followuser() {
             if (!checkifaccs()) { return }
             let content = document.getElementById("postinput").value;
-            await fetch("https://claw.rotur.dev/post?content=" + content + "&os=lyraOS&auth=" +
+            await fetch("https://claw.rotur.dev/post?content=" + content + "&os=ctrl&auth=" +
                 window.parent.roturExtension.userToken);
         }
 
@@ -1215,14 +1215,14 @@ refresh
                 followbtntxt.innerHTML = "Unfollow";
                 followbtn.style.background = "#2f2f2f";
                 followbtn.onclick = async () => {
-                    await fetch("https://claw.rotur.dev/unfollow?username=" + name + "&os=lyraOS&auth=" +
+                    await fetch("https://claw.rotur.dev/unfollow?username=" + name + "&os=ctrl&auth=" +
                         window.parent.roturExtension.userToken);
                 }
             } else {
                 followbtntxt.innerHTML = "Follow";
                 followbtn.style.background = "#4e5fa7";
                 followbtn.onclick = async () => {
-                    await fetch("https://claw.rotur.dev/follow?username=" + name + "&os=lyraOS&auth=" +
+                    await fetch("https://claw.rotur.dev/follow?username=" + name + "&os=ctrl&auth=" +
                         window.parent.roturExtension.userToken);
                 }
             }
@@ -1241,7 +1241,7 @@ refresh
             let signedinch = window.parent.roturExtension.loggedIn();
             if (!signedinch) {
                 window.parent.toast("You don't have a rotur account linked.");
-                window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@lyra', 'run':'true'});
+                window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@ctrl', 'run':'true'});
                 loadFeed()
             }
             return signedinch;

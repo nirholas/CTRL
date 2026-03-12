@@ -1,8 +1,8 @@
 # The EventBusWorker
 
-## What is LyraOS `EventBusWorker`?
+## What is CTRL `EventBusWorker`?
 
-LyraOS EventBusWorker is system for all of LyraOS and its apps to know what is being updated in real time, and possibly with more context.
+CTRL EventBusWorker is system for all of CTRL and its apps to know what is being updated in real time, and possibly with more context.
 
 ## How to access the event bus?
 
@@ -68,7 +68,7 @@ The settings event has this default syntax:
 }
 ```
 
-Here is a list of all settings codes and how to get the values of them: [Settings Descriptions](https://github.com/nirholas/LyraOS/wiki/Settings-Descriptions)
+Here is a list of all settings codes and how to get the values of them: [Settings Descriptions](https://github.com/nirholas/CTRL/wiki/Settings-Descriptions)
 
 #### Event titles
 
@@ -109,4 +109,4 @@ Events that have no listeners, will not get broadcasted.
 
 ## Use cases
 
-Whether you want to show a reflection of the virtual memory system, or you wanted to mirror the contents of an updating file while its being saved per every change, the LyraOS event bus could be used as an efficient updates system that lets you remotely do things, without spamming unwanted calls.
+Whether you want to show a reflection of the virtual memory system, or you wanted to mirror the contents of an updating file while its being saved per every change, the CTRL event bus could be used as an efficient updates system that lets you remotely do things, without spamming unwanted calls.

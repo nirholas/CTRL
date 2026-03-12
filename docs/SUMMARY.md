@@ -1,10 +1,10 @@
 # Table of contents
 
-* [Welcome to LyraOS👋](README.md)
+* [Welcome to CTRL👋](README.md)
 
 ## Get started
 
-* [Access LyraOS](get-started/access-lyra.md)
+* [Access CTRL](get-started/access-ctrl.md)
 
 ## docs
 
@@ -24,7 +24,7 @@
 * [Standards](docs/standards/README.md)
   * [Error standards](docs/standards/error-standards.md)
 * [Networking](docs/networking/README.md)
-  * [Rotur In LyraOS](docs/networking/rotur-in-lyraos.md)
+  * [Rotur In CTRL](docs/networking/rotur-in-ctrl.md)
 
 ## ❓ How to
 
@@ -32,7 +32,7 @@
   * [Changing default openers](how-to/pro/changing-default-openers.md)
   * [Data recovery](how-to/pro/data-recovery.md)
   * [Using the Tasks Dock](how-to/pro/using-the-tasks-dock.md)
-* [Publish to Lyra Store](how-to/publish-to-lyra-store.md)
+* [Publish to CTRL Store](how-to/publish-to-ctrl-store.md)
 * [Protips](how-to/protips.md)
 
 ## 🗃️ References

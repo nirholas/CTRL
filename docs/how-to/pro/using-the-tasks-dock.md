@@ -4,9 +4,9 @@ icon: rectangle-history
 
 # Using the Tasks Dock
 
-<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption><p>The Tasks Dock in LyraOS 2.05</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption><p>The Tasks Dock in CTRL 2.05</p></figcaption></figure>
 
-LyraOS tasks dock is a wonderful tool if you need to multitask in LyraOS. Multitasking requires constant window management actions including minimizing, restoring, and reordering windows on the depth scale.
+CTRL tasks dock is a wonderful tool if you need to multitask in CTRL. Multitasking requires constant window management actions including minimizing, restoring, and reordering windows on the depth scale.
 
 The task dock allows all these window management functions to be done with simple clicks on the icons of corresponding windows.&#x20;
 

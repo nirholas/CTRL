@@ -150,7 +150,7 @@ nav [navobj] {
 	transition: var(--time1);
 }
 
-#lyraic {
+#ctrlic {
 	fill: var(--col-txt1);
 }
 
@@ -1085,7 +1085,7 @@ nav [navobj] {
 	font-size: 15px;
 }
 
-input#lyramenusearchinp {
+input#ctrlmenusearchinp {
 	display: flex;
 	width: 60px;
 	font-size: inherit;
@@ -1096,7 +1096,7 @@ input#lyramenusearchinp {
 	color: inherit;
 }
 
-.lyramenusearchinpbtn span {
+.ctrlmenusearchinpbtn span {
 	font-size: 1rem;
 	display: flex;
 	align-items: center;
@@ -1104,7 +1104,7 @@ input#lyramenusearchinp {
 	opacity: 0.5;
 }
 
-.lyramenusearchinpbtn {
+.ctrlmenusearchinpbtn {
 	display: flex !important;
 	flex-direction: row;
 	background: var(--col-bg2);

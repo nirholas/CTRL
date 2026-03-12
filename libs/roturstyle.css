@@ -387,7 +387,7 @@ textarea::placeholder {
     white-space: nowrap;
 
     &:after {
-        content: "⚠️ RoturTW is a third party service. If enabled, RoturTW will have access to your LyraOS sessions.";
+        content: "⚠️ RoturTW is a third party service. If enabled, RoturTW will have access to your CTRL sessions.";
         display: flex;
         padding: .5em;
         background: var(--col-bg3);

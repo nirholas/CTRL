@@ -1,4 +1,4 @@
-# Rotur In LyraOS
+# Rotur In CTRL
 
 ### Available methods
 

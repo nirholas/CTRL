@@ -1,4 +1,4 @@
-var batteryLevel, winds = {}, memory = {}, _nowapp, fulsapp = false, appsHistory = [], nowwindow, appicns = {}, fileslist = [], badlaunch = false, initmenuload = true, fileTypeAssociations = {}, handlers = {}, Gtodo, notifLog = {}, initialization = false, onstartup = [], lyraFeaturedImage = `Dev.png`, defAppsList = [
+var batteryLevel, winds = {}, memory = {}, _nowapp, fulsapp = false, appsHistory = [], nowwindow, appicns = {}, fileslist = [], badlaunch = false, initmenuload = true, fileTypeAssociations = {}, handlers = {}, Gtodo, notifLog = {}, initialization = false, onstartup = [], ctrlFeaturedImage = `Dev.png`, defAppsList = [
 	"store",
 	"files",
 	"settings",
@@ -84,7 +84,7 @@ function loginscreenbackbtn() {
 async function showloginmod() {
 	if (badlaunch) { return }
 	var imgprvtmp = gid("wallbgpreview");
-	imgprvtmp.src = lyraFeaturedImage;
+	imgprvtmp.src = ctrlFeaturedImage;
 	imgprvtmp.onload = function handler() {
 		imgprvtmp.onload = null;
 
@@ -109,7 +109,7 @@ async function showloginmod() {
 					CurrentUsername = cacusername;
 					let isdefaultpass = false;
 					try {
-						isdefaultpass = await checkPassword('lyra');
+						isdefaultpass = await checkPassword('ctrl');
 					} catch (err) {
 						console.error("Password check failed:", err);
 					}
@@ -258,7 +258,7 @@ async function startup() {
 			const end = performance.now();
 
 			rllog(
-				`You are using \n\n%cLyraOS%c\n%cLyraOS is the web system made for you.%c\n\nStartup: ${(end - start).toFixed(2)}ms\nUsername: ${CurrentUsername}\n12hr Time format: ${timetypecondition}`,
+				`You are using \n\n%cCTRL%c\n%cCTRL is the web system made for you.%c\n\nStartup: ${(end - start).toFixed(2)}ms\nUsername: ${CurrentUsername}\n12hr Time format: ${timetypecondition}`,
 				'color: white; background-color: #101010; font-size: 2rem; padding: 0.7rem 1rem; border-radius: 1rem;',
 				'',
 				'padding:5px 0; padding-top:1rem;',
@@ -312,8 +312,8 @@ async function openn() {
 		initmenuload = false;
 		gid("appdmod").close();
 		let choicetoreinst = await justConfirm(
-			`Re-initialize lyraOS?`,
-			`Did the lyraOS initialization fail? If yes, we can re-initialize your lyraOS and install all the default apps. \n\nLyraOS did not find any apps while the initial load of Lyra Menu. \n\nRe-initializing your lyraOS may delete your data.`
+			`Re-initialize ctrl?`,
+			`Did the ctrl initialization fail? If yes, we can re-initialize your ctrl and install all the default apps. \n\nCTRL did not find any apps while the initial load of CTRL Menu. \n\nRe-initializing your ctrl may delete your data.`
 		);
 		if (choicetoreinst) {
 			initializeOS();
@@ -414,7 +414,7 @@ async function loadrecentapps() {
 			Array.from(metaTags).forEach(tag => {
 				const tagName = tag.getAttribute('name');
 				const tagContent = tag.getAttribute('content');
-				if (tagName === 'lyra-icon' && tagContent) {
+				if (tagName === 'ctrl-icon' && tagContent) {
 					metaTagData = tagContent;
 				}
 			});
@@ -440,7 +440,7 @@ async function loadrecentapps() {
 		gid("serrecentapps").appendChild(appShortcutDiv);
 	})).then(async () => {
 
-		gid("lyramenusearchinp").focus();
+		gid("ctrlmenusearchinp").focus();
 	}).catch((error) => {
 		console.error('An error occurred:', error);
 	});
@@ -589,7 +589,7 @@ async function getAppIcon(content, id, lazy = 0) {
 				if (!file || !file.content) throw new Error("File content unavailable " + id);
 				content = file.content;
 			}
-			const iconContent = await withTimeout(getMetaTagContent(content, 'lyra-icon', true));
+			const iconContent = await withTimeout(getMetaTagContent(content, 'ctrl-icon', true));
 			if (iconContent && containsSmallSVGElement(iconContent)) {
 				appicns[id] = iconContent;
 				await saveIconToRegistry(id, iconContent, registry);
@@ -913,7 +913,7 @@ async function registerApp(appId, capabilities) {
 	}
 
 	if (!initialization)
-		notify(await getFileNameByID(appId) + " installed", "Registered " + capabilities.toString(), "LyraOS System");
+		notify(await getFileNameByID(appId) + " installed", "Registered " + capabilities.toString(), "CTRL System");
 	return capabilities.toString();
 }
 
@@ -1198,7 +1198,7 @@ async function initializeOS() {
 	dbCache = null;
 	cryptoKeyCache = null;
 	await say(`
-		<h2>LyraOS is open source.</h2>
+		<h2>CTRL is open source.</h2>
 		<p>
 		This uses Google to count users and identify device kinds. 
 		</p><div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin: 0.8rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5rem;">
@@ -1206,7 +1206,7 @@ async function initializeOS() {
 			<div>We do not store or share your personal information.</div>
 		</div>
 	`);
-	console.log("Setting Up LyraOS\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
+	console.log("Setting Up CTRL\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
 	initialization = true
 	memory = {
 		"root": {
@@ -1234,7 +1234,7 @@ async function initializeOS() {
 				let textcontentwelcome = await fetch("appdata/welcome.html");
 				textcontentwelcome = await textcontentwelcome.text();
 				await createFile('Downloads/', 'Welcome.html', 'html', textcontentwelcome)
-				notify("Welcome to LyraOS, " + CurrentUsername + "!", "We have been waiting for you", "LyraOS")
+				notify("Welcome to CTRL, " + CurrentUsername + "!", "We have been waiting for you", "CTRL")
 				initialization = false;
 			})
 	})
@@ -1371,7 +1371,7 @@ async function rlstrtappse(event) {
 
 	if (event.key === "Enter") {
 		event.preventDefault();
-		if (searchValue === "i love lyra") {
+		if (searchValue === "i love ctrl") {
 			closeElementedis(gid("searchwindow"));
 			let x = await ask("What can i call you?");
 			say("i love you too, " + x);
@@ -1687,7 +1687,7 @@ function runAsOSL(content) {
 			border: none;
 		}
 	</style>`;
-	openwindow("Lyra OSL Runner", cont);
+	openwindow("CTRLL Runner", cont);
 }
 function runAsWasm(content) {
 	const wasmBytes = new Uint8Array(content);
@@ -1708,7 +1708,7 @@ function runAsWasm(content) {
 		}
 	`;
 	div.appendChild(script);
-	openwindow("Lyra Wasm Runner", div.innerHTML);
+	openwindow("CTRL Wasm Runner", div.innerHTML);
 }
 
 (async () => {
@@ -1730,19 +1730,19 @@ function runAsWasm(content) {
 
 async function realgenTaskBar() {
 	gid("dock").style.display = "none";
-	gid("lyranav").style.display = "grid";
+	gid("ctrlnav").style.display = "grid";
 
 	// nav theme
 	try {
 
 		var LyrNavCtrl = await getSetting("LyrNavCtrl")
 		if (LyrNavCtrl.bg) {
-			gid("lyranav").style.backgroundColor = "transparent";
+			gid("ctrlnav").style.backgroundColor = "transparent";
 		} else {
-			gid("lyranav").style.backgroundColor = "var(--col-bg1)";
+			gid("ctrlnav").style.backgroundColor = "var(--col-bg1)";
 		}
 
-		gid("lyranav").style.justifyContent = LyrNavCtrl.align;
+		gid("ctrlnav").style.justifyContent = LyrNavCtrl.align;
 	} catch (e) { }
 
 	var appbarelement = document.getElementById("dock");
@@ -1901,7 +1901,7 @@ async function renderWall() {
 	}
 	document.getElementById("bgimage").onerror = async function (event) {
 		toast("It doesn't seem to work as the wallpaper...")
-		setbgimagetourl(lyraFeaturedImage);
+		setbgimagetourl(ctrlFeaturedImage);
 		if (await getSetting("wall")) {
 			remSettingKey("wall");
 		}
@@ -1966,7 +1966,7 @@ async function checkifpassright() {
 	}
 	gid("loginform1").value = '';
 }
-async function logoutoflyra() {
+async function logoutofctrl() {
 	await cleanupram();
 	await showloginmod();
 	removeTheme();
@@ -1979,7 +1979,7 @@ async function cleanupram() {
 	document.querySelectorAll('dialog[open].onramcloseable').forEach(dialog => dialog.close());
 	memory = null;
 	CurrentUsername = null;
-	password = 'lyra';
+	password = 'ctrl';
 	winds = {};
 	MemoryTimeCache = null;
 	lethalpasswordtimes = true;
@@ -1995,7 +1995,7 @@ async function setandinitnewuser() {
 	await initializeOS();
 	gid('loginmod').close();
 }
-async function lyrarefresh() {
+async function ctrlrefresh() {
 	genDesktop();
 	genTaskBar();
 	cleanupInvalidAssociations();
@@ -2006,7 +2006,7 @@ async function lyrarefresh() {
 	loadSessionSettings();
 }
 function launchbios() {
-	document.getElementById('lyrasetupusernamedisplay').innerText = CurrentUsername;
+	document.getElementById('ctrlsetupusernamedisplay').innerText = CurrentUsername;
 	document.getElementById('bios').showModal();
 }
 function domLoad_checkedgecases() {
@@ -2032,7 +2032,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 	genTaskBar = debounce(realgenTaskBar, 500);
 	genDesktop = debounce(realgenDesktop, 500);
 
-	const searchInput5342 = document.querySelector('#lyramenusearchinp');
+	const searchInput5342 = document.querySelector('#ctrlmenusearchinp');
 	let keyHeld = false;
 
 	searchInput5342.addEventListener('keydown', () => {
@@ -2082,7 +2082,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 	await loadScripts();
 
-	setbgimagetourl(lyraFeaturedImage);
+	setbgimagetourl(ctrlFeaturedImage);
 
 	gid("nowrunninapps").style.display = "none";
 	gid('seprw-openb').onclick = function () {
@@ -2147,7 +2147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 	}
 
 	startfunctions();
-	gid("lyranav").style.display = "none";
+	gid("ctrlnav").style.display = "none";
 	async function waitForNonNull() {
 		const startTime = Date.now();
 		const maxWaitTime = 2000;

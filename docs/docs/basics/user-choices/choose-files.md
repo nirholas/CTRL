@@ -1,10 +1,10 @@
 # Choose files
 
-This page is all about letting a user choose a file from their file system. LyraOS lets users select files from the registered app, which has its capabilities as  '`file_manager`'.
+This page is all about letting a user choose a file from their file system. CTRL lets users select files from the registered app, which has its capabilities as  '`file_manager`'.
 
 ## Requesting a file selector window
 
-Here is the method to summon a choose file window with the default files app in LyraOS.
+Here is the method to summon a choose file window with the default files app in CTRL.
 
 ```javascript
 await ntx.olp.useHandler("file_manager", { 

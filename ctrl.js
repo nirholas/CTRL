@@ -1,5 +1,5 @@
 
-var lyraos = {
+var ctrl = {
   shrinkString: function (str) {
     return window.parent.shrinkbsf(str)
   },

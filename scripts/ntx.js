@@ -94,10 +94,10 @@ class NTXSession {
             cleanupInvalidAssociations: cleanupInvalidAssociations,
             sysLog: sysLog,
             password: password,
-            eraseLyra: erdbsfull
+            eraseCTRL: erdbsfull
         };
         this.specific = {
-            useLyraOffline: useLyraOffline,
+            useCTRLOffline: useCTRLOffline,
             removeSWs: removeSWs,
             installdefaultapps: installdefaultapps
         }

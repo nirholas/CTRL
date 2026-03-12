@@ -4,15 +4,15 @@ icon: circle-arrow-up-right
 
 # Changing default openers
 
-In LyraOS, file types, usually identified from the extension stored as a suffix in the name of the file, can be registered in the name of different applications. These applications can handle those file types.
+In CTRL, file types, usually identified from the extension stored as a suffix in the name of the file, can be registered in the name of different applications. These applications can handle those file types.
 
-The LyraOS Kernel uses the OLP to open these apps with the data about selected files that the app should respond about. The kernel uses a stored key value pair that is created during the installation of the app, in which the app IDs point to what file extensions they can handle.
+The CTRL Kernel uses the OLP to open these apps with the data about selected files that the app should respond about. The kernel uses a stored key value pair that is created during the installation of the app, in which the app IDs point to what file extensions they can handle.
 
 This feature allows apps to register custom file types or read rare file types by default. These registered apps are called "Default openers".
 
 ## Changing default openers
 
-On LyraOS Settings, you can change these default opener applications, only for registered file types.&#x20;
+On CTRL Settings, you can change these default opener applications, only for registered file types.&#x20;
 
 {% hint style="warning" %}
 Meanwhile you can change the default openers, the default opener app decides how to handle these files, and if the app doesnt support the target file, the app would simply ignore the operation.
@@ -56,7 +56,7 @@ After selecting the file in the file selector, click open button in the bottom r
 {% endstep %}
 {% endstepper %}
 
-To finish off your change, test LyraOS by trying to open file of that type.
+To finish off your change, test CTRL by trying to open file of that type.
 
 {% hint style="info" %}
 ## Facing any issues?

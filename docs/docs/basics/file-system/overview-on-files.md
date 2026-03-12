@@ -1,12 +1,12 @@
 # Overview on files
 
-Lyra has a GUI for managing files, which is the text app and files app, but what if you want to make one such? what if you need to make a file explorer or a text editor, what about a media player?
+CTRL has a GUI for managing files, which is the text app and files app, but what if you want to make one such? what if you need to make a file explorer or a text editor, what about a media player?
 
 You will see just that in this documentation!
 
 ## Creating a file
 
-How do you make a file out of thin air in LyraOS? Well, you can make a file using the NTX's  `createFile()` function, nothing big or complicated.
+How do you make a file out of thin air in CTRL? Well, you can make a file using the NTX's  `createFile()` function, nothing big or complicated.
 
 ### Using `createFile`
 
@@ -28,10 +28,10 @@ Where `folderName` is the folder where the file should be saved (the folder will
 ### File Metadata
 
 {% hint style="info" %}
-Metadata is not a requirement for creating a file. Imagine you are taking a picture with the camera app, the next week you need that picture to see it again, you know when it was taken - how do you locate it? This is why metadata is a huge deal; saving more data, like the date, time, location, or other statuses, can increase the chances of a file becoming more useful. Metadata in the LyraOS file ecosystem allows you to do just that, storing more data about the file content without changing the content.
+Metadata is not a requirement for creating a file. Imagine you are taking a picture with the camera app, the next week you need that picture to see it again, you know when it was taken - how do you locate it? This is why metadata is a huge deal; saving more data, like the date, time, location, or other statuses, can increase the chances of a file becoming more useful. Metadata in the CTRL file ecosystem allows you to do just that, storing more data about the file content without changing the content.
 {% endhint %}
 
-By default, Lyra OS saves the timestamp metadata. This is its format:
+By default, CTRL saves the timestamp metadata. This is its format:
 
 ```json
 {"via":"nope","datetime":1731327471707}

@@ -1,16 +1,16 @@
 # Introduction
 
-Applications in LyraOS are singular HTML files saved with an `.app` extension. The syntax and functionality are similar to that of native web development, but with certain additions that let the app perform natively with LyraOS features.
+Applications in CTRL are singular HTML files saved with an `.app` extension. The syntax and functionality are similar to that of native web development, but with certain additions that let the app perform natively with CTRL features.
 
-App files can be launched from anywhere and will follow the same method. In LyraOS, the launching of apps is controlled by the LyraOS Kernel
+App files can be launched from anywhere and will follow the same method. In CTRL, the launching of apps is controlled by the CTRL Kernel
 
 ## NTX
 
 {% hint style="info" %}
-From LyraOS 2.1, NTX has become the heart of LyraOS applications. Even though it's optional, features like NTX and Lyra.CSS give access to a library of native features in the system.
+From CTRL 2.1, NTX has become the heart of CTRL applications. Even though it's optional, features like NTX and CTRL.CSS give access to a library of native features in the system.
 {% endhint %}
 
-Inter-app and other communications are controlled by a centralized transaction system, the Lyra Transaction Exchange (or NTX). NTX also deals with application-system communication. NTX is separated into many namespaces, like utility, fileGet, settings, etc.
+Inter-app and other communications are controlled by a centralized transaction system, the CTRL Transaction Exchange (or NTX). NTX also deals with application-system communication. NTX is separated into many namespaces, like utility, fileGet, settings, etc.
 
 Each NTX namespace requires permission from the user to resolve correctly. If required permissions aren't granted on app install, namespace permissions would be asked one at a time.
 
@@ -39,5 +39,5 @@ The user can turn off any of these namespaces for your application; this will ca
 ## Future
 
 {% hint style="info" %}
-The upcoming LyraOS Panels in Lyra Nav would have a different syntax from the applications, which would allow them to function best in a widget-like fashion.
+The upcoming CTRL Panels in CTRL Nav would have a different syntax from the applications, which would allow them to function best in a widget-like fashion.
 {% endhint %}

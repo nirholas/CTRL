@@ -1,5 +1,5 @@
 {
-  "LyraOS Classic": {
+  "CTRL Classic": {
     "type": "dark",
     "colors": {
       "--col-bg1": "#101010",
@@ -26,7 +26,7 @@
       "--col-good": "#50358C",
       "--col-bad": "#AC2487"
     },
-    "wallpaper": "https://file.garden/ZYaO49YewxMFnAd1/LyraOS%20TTA%20Wallpapers/Rock/Obsidian1"
+    "wallpaper": "https://file.garden/ZYaO49YewxMFnAd1/CTRL%20TTA%20Wallpapers/Rock/Obsidian1"
   },
   "Crimson Midnight": {
     "type": "dark",
@@ -166,7 +166,7 @@
       "--col-good": "#49AC49",
       "--col-bad": "#AC4949"
     },
-    "wallpaper": "https://file.garden/ZYaO49YewxMFnAd1/LyraOS%20TTA%20Wallpapers/Rock/Diorite1"
+    "wallpaper": "https://file.garden/ZYaO49YewxMFnAd1/CTRL%20TTA%20Wallpapers/Rock/Diorite1"
   },
   "Dorito Dust": {
     "type": "bright",

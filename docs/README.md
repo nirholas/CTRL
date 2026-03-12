@@ -2,16 +2,16 @@
 icon: hand-wave
 ---
 
-# Welcome to LyraOS👋
+# Welcome to CTRL👋
 
-LyraOS is a web-based operating system containing an App Ecosystem powered by a community of Creators like you.
+CTRL is a web-based operating system containing an App Ecosystem powered by a community of Creators like you.
 
-This documentation is written so that you can discover how LyraOS works or how a system like this would work, specifically, making applications and using advanced customization features.
+This documentation is written so that you can discover how CTRL works or how a system like this would work, specifically, making applications and using advanced customization features.
 
-LyraOS is Open Source (GPL v3), but it does not merge pull requests
+CTRL is Open Source (GPL v3), but it does not merge pull requests
 
-You can eventually create your dream web apps that utilize an increased set of features right in LyraOS. It supports all modern devices. It has a fully self-contained ecosystem and a unique user experience.&#x20;
+You can eventually create your dream web apps that utilize an increased set of features right in CTRL. It supports all modern devices. It has a fully self-contained ecosystem and a unique user experience.&#x20;
 
-[Try LyraOS now](get-started/access-lyraos.md) 
+[Try CTRL now](get-started/access-ctrl.md) 
 
 This documentation was formed over time, including answers to the most important questions you may be curious about. Starting from the basics of usage and behind-the-scenes design. Feel free to point out outdated content, errors, or documentation requirements at our Discord Server

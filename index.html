@@ -4,13 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>LyraOS</title>
+	<title>CTRL</title>
 	<script src="scripts/readwrite.js" defer></script>
 	<script src="system32.js" defer></script>
-	<link rel="stylesheet" href="lyra.css">
+	<link rel="stylesheet" href="ctrl.css">
 	<link rel="stylesheet" href="style.css">
 	<link rel="icon" type="image/webp" href="n.png">
-	<!--LyraOS scripts-->
+	<!--CTRL scripts-->
 	<script src="scripts/utility.js"></script>
 	<script src="script.js" defer></script>
 	<!--PWA Manifest-->
@@ -87,11 +87,11 @@
 			</dialog>
 			<dialog id="edison">
 				<div class="edisonrl">
-					<img src="n.png" alt="LyraOS Logo">
+					<img src="n.png" alt="CTRL Logo">
 					<div class="progress-container">
 						<div class="progress-bar" id="progress-bar"></div>
 					</div>
-					<div id="startupterms">Loading LyraOS scripts</div>
+					<div id="startupterms">Loading CTRL scripts</div>
 
 					<small class="erase-everything"><a>x </a><a onclick="erdbsfull()">Erase Everything</a></small>
 				</div>
@@ -110,7 +110,7 @@
 				<h1>I can't even know what time is it now.<br>Blame your browser for it.</h1>
 				<p>Well your browser seems to be messing around saying you turned off JS. Javascript is required for the functioning of the modern web. </p>
 				<b>If you have set JS to be disabled:</b>
-				<p>LyraOS requires JS to run.
+				<p>CTRL requires JS to run.
 				<li>You can always <b><a href="https://www.larimer.gov/it/enable-javascript" style="color:white;"> turn JS back on</a>.</b>
 				</li>
 				<li>Or try a different browser.
@@ -148,7 +148,7 @@
 			<div id="maxappscontainer">
 
 			</div>
-			<nav id="lyranav" class="scalableui">
+			<nav id="ctrlnav" class="scalableui">
 				<div class="flodiv">
 					<quicks navobj id="dock">
 
@@ -195,9 +195,9 @@
 				</div>
 				<div class="strtsearcont">
 					<div class="neweles" id="bobthedropdown">
-						<div class="lyramenusearchinpbtn"
+						<div class="ctrlmenusearchinpbtn"
 							onclick="document.getElementById('appdmod').close(); opensearchpanel();">
-							<input id="lyramenusearchinp" placeholder="Search"></span>
+							<input id="ctrlmenusearchinp" placeholder="Search"></span>
 							<span class="material-symbols-rounded">
 								search
 							</span>
@@ -218,7 +218,7 @@
 							</span>
 						</button>
 						<button class="tooltip " onclick="launchbios()">
-							<span class="tooltiptext">Lyra Setup</span>
+							<span class="tooltiptext">CTRL Setup</span>
 							<span class="material-symbols-rounded">
 								power
 							</span>
@@ -238,7 +238,7 @@
 								</label>
 							</div>
 						</button>
-						<button class="tooltip " style="margin-left: auto;" onclick="logoutoflyra()">
+						<button class="tooltip " style="margin-left: auto;" onclick="logoutofctrl()">
 							<span class="tooltiptext">Sign Out</span>
 							<span class="material-symbols-rounded">
 								logout
@@ -259,8 +259,8 @@
 				<span class="material-symbols-rounded closebtn" onclick="gid('bios').close()">
 					close
 				</span>
-				<small>Welcome to LyraOS Setup,</small>
-				<h1 id="lyrasetupusernamedisplay"></h1>
+				<small>Welcome to CTRL Setup,</small>
+				<h1 id="ctrlsetupusernamedisplay"></h1>
 			<div class="buttongroup-grid">
 				<button onclick="gid('terminal').showModal();gid('bios').close();">
 					<span class="material-symbols-rounded">
@@ -280,7 +280,7 @@
 					</span>
 					Fix default apps
 				</button>
-				<button onclick="logoutoflyra()">
+				<button onclick="logoutofctrl()">
 					<span class="material-symbols-rounded">
 						logout
 					</span>
@@ -302,7 +302,7 @@
 					<span class="material-symbols-rounded">
 						restart_alt
 					</span>
-					Reset LyraOS
+					Reset CTRL
 				</button>
 			</div>
 		</dialog>
@@ -421,7 +421,7 @@
 
 	<dialog id="nich">
 		<h1 id="nich-title">Nich</h1>
-		<span>LyraOS is being installed...</span>
+		<span>CTRL is being installed...</span>
 	</dialog>
 </body>
 

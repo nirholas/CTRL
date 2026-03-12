@@ -9,8 +9,8 @@
 	<script src="https://jscolor.com/release/2.5/jscolor-2.5.2/jscolor.js"></script>
 	<meta name="permissions" content="olp, settings, system, unsandboxed">
 	<meta name="capabilities" content="settings_manager">
-	<meta name="lyra-include" content="lyra.css material-symbols-rounded">
-	<meta name="lyra-icon"
+	<meta name="ctrl-include" content="ctrl.css material-symbols-rounded">
+	<meta name="ctrl-icon"
 		content="<svg width='232' height='232' viewBox='0 0 232 232' fill='none' xmlns='http://www.w3.org/2000/svg'> <g clip-path='url(#clip0_3_148)'> <rect x='28' y='28' width='175' height='175' rx='20' fill='#737373'/> <rect x='-8' y='115.5' width='174.655' height='174.655' rx='20' transform='rotate(-45 -8 115.5)' fill='#B4B4B4'/> <circle cx='115.5' cy='115.5' r='67.5' fill='white'/> <circle cx='115.5' cy='115.5' r='53.5' fill='#6179FF'/> </g> <defs> <clipPath id='clip0_3_148'> <rect width='232' height='232' fill='white'/> </clipPath> </defs> </svg>">
 
 	<style>
@@ -1661,7 +1661,7 @@
 			</div>
 			<script>
 				async function openlink(x) {
-					let okay = await ntxSession.send("sysUI.confirm", "Are you sure?", "Open " + x + " outside of lyraOS?");
+					let okay = await ntxSession.send("sysUI.confirm", "Are you sure?", "Open " + x + " outside of ctrl?");
 					if (okay) {
 						window.open(x);
 					}
@@ -1943,7 +1943,7 @@
 							const percent = (typeCounts[type] / total) * 100;
 							if (percent >= 1) {
 								if (!colors[type]) {
-									colors[type] = window.parent.stringToDarkPastelColor(type + "lyraOs");
+									colors[type] = window.parent.stringToDarkPastelColor(type + "ctrlOs");
 								}
 								const div = document.createElement('div');
 								div.style.width = percent + '%';
@@ -2063,8 +2063,8 @@
 			<segr>
 				<div class="single_setting">
 					<div class="settingName">
-						<b>Use lyraOS offline</b>
-						<p>If enabled, lyra will try to cache the os and save it offline.
+						<b>Use ctrl offline</b>
+						<p>If enabled, ctrl will try to cache the os and save it offline.
 					</p>
 					</div>
 					<input class="turnon_checkbox" type="checkbox" id="cbx-70">
@@ -2148,19 +2148,19 @@
 							console.error(error)
 						}
 
-						// offline lyra
+						// offline ctrl
 						document.getElementById("cbx-70").addEventListener("change", function () {
 							let newValue2 = document.getElementById("cbx-70").checked;
 							if (newValue2) {
-								ntxSession.send("specific.uselyraOffline",);
+								ntxSession.send("specific.usectrlOffline",);
 							} else {
 								ntxSession.send("specific.removeSWs",)
 							}
-							ntxSession.send("settings.set", "lyraOffline", newValue2)
+							ntxSession.send("settings.set", "ctrlOffline", newValue2)
 						});
 
 						try {
-							if (await ntxSession.send("settings.get", "lyraOffline")) {
+							if (await ntxSession.send("settings.get", "ctrlOffline")) {
 								document.getElementById("cbx-70").checked = true;
 							}
 						} catch (error) {
@@ -2231,7 +2231,7 @@
 						document.getElementById("timefrmt").addEventListener("change", function () {
 							let newValue = document.getElementById("timefrmt").value;
 							ntxSession.send("settings.set", "timefrmt", newValue);
-							ntxSession.send("sysUI.toast", "Reload lyraOS for the changes to take effect.");
+							ntxSession.send("sysUI.toast", "Reload ctrl for the changes to take effect.");
 							console.log("timfired")
 						});
 
@@ -2390,7 +2390,7 @@
 					if (!confirm("Erase Device? \nThis will remove all data, including every user's files, folders, apps, permissions, cache and everything.\n\nWould you like to Clear your device?")) {
 						return;
 					}
-					await ntxSession.send("system.eraselyra",);
+					await ntxSession.send("system.erasectrl",);
 				}
 				async function erdbsur() {
 					if (!confirm("Remove User? \nThis will remove your data, including your files, folders, apps, permissions, cache and everything.\n\nWould you like to Clear your account?")) {
@@ -2421,7 +2421,7 @@
 					</div>
 					<div class="divider"></div>
 					<div class="btngrpelem">
-						<button onclick="window.parent.logoutoflyra()">
+						<button onclick="window.parent.logoutofctrl()">
 
 							<span class="material-symbols-rounded">
 								logout
@@ -2469,14 +2469,14 @@
 			</segr>
 			<script>
 				document.getElementById("userstatsi").innerHTML = window.parent.CurrentUsername;
-				if (window.parent.password == 'lyra') {
+				if (window.parent.password == 'ctrl') {
 					document.getElementById("passstat").innerHTML = "Set a password for your device:";
 				} else {
 					document.getElementById("passstat").innerHTML = "Change your password";
 				}
 				async function chstpass() {
 					var setpass = '';
-					if (window.parent.password == 'lyra') {
+					if (window.parent.password == 'ctrl') {
 						setpass = await ntxSession.send("sysUI.ask", "Set a password: ", "")
 					} else {
 						setpass = await ntxSession.send("sysUI.ask", "Choose an another password: ", window.parent.password);
@@ -2596,15 +2596,15 @@
 				}</script>
 		</div>
 		<div id="about" class="tabcontent">
-			<h2 style="margin-bottom: 3px;">lyra OS <span style="font-weight: normal;">lyra</span></h2>
+			<h2 style="margin-bottom: 3px;">ctrl OS <span style="font-weight: normal;">ctrl</span></h2>
 			<p style="margin-bottom: 1em;">Version 2.1</p>
 			<supportb>
-				<b>lyraOS is Free.</b>
+				<b>ctrl is Free.</b>
 				<p>Star the repo! It's Open Source:
 				</p>
 				<div class="supportbtns">
 					<a id="membershipsbtn"
-						onclick="window.open('https://github.com/runlyra/lyraOS')">Star the repo</a>
+						onclick="window.open('https://github.com/runctrl/ctrl')">Star the repo</a>
 				</div>
 
 				<script>
@@ -2629,7 +2629,7 @@
 			<segr>
 				<div class="single_setting">
 					<div class="settingName">
-						<b>lyraOS updates</b>
+						<b>ctrl updates</b>
 						<p>Follow for more updates</p>
 					</div>
 					<button onclick="window.open('https://x.com/nichxbt')">Follow</button>
@@ -2681,7 +2681,7 @@
 					</g>
 				</svg>
 
-				<p>Our bug hunters and the community provided valuable feedback and raised issues, helping lyraOS to progress. Thank you being a part!</p>
+				<p>Our bug hunters and the community provided valuable feedback and raised issues, helping ctrl to progress. Thank you being a part!</p>
 			</small>
 		</div>
 
@@ -2903,7 +2903,7 @@
 			<h1>Connect to a network</h1>
 			<segr>
 				<div class="single_setting"
-					onclick="window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@lyra', 'run':'true'});">
+					onclick="window.parent.useHandler('content_store', {'opener':'viewapp', 'data':'Rotur Dashboard@ctrl', 'run':'true'});">
 					<div class="settingName"><b>RoturTW</b>
 						<p>Configure RoturTW networking</p>
 					</div>
@@ -2960,7 +2960,7 @@
 						<b>Initialize rotur</b>
 						<button onclick="loginOnceRotur()">Start</button>
 					</div>
-					<small>RoturTW is a third party service, which offers APIs. lyraOS supports it but isn't affiliated
+					<small>RoturTW is a third party service, which offers APIs. ctrl supports it but isn't affiliated
 						or
 						endorsing. Visit rotur.dev for details.</small>
 				</segr>
@@ -2974,7 +2974,7 @@
 				<script>
 					async function loginOnceRotur() {
 						await window.parent.attemptConnection();
-						window.parent.roturExtension.login_prompt({ STYLE_URL: "https://lyra.github.io/lyra-dev-repl-rl/libs/roturstyle.css" });
+						window.parent.roturExtension.login_prompt({ STYLE_URL: "https://ctrl.github.io/ctrl-dev-repl-rl/libs/roturstyle.css" });
 					}
 					async function signoutrtrsets() {
 						await window.parent.logoutofrtr();
@@ -3039,7 +3039,7 @@
 					<input class="colorpickerui" id="text-high" data-variable="--col-txth"></input>
 				</div>
 			</segr>
-			<h3>lyra Nav <div class="betatag">beta</div>
+			<h3>ctrl Nav <div class="betatag">beta</div>
 			</h3>
 			<segr>
 				<div class="single_setting">
@@ -3433,7 +3433,7 @@
 				}
 
 				function getCSSVariableValue(varName) {
-					const styleTag = window.parent.document.getElementById('lyracsstag');
+					const styleTag = window.parent.document.getElementById('ctrlcsstag');
 					if (!styleTag) return null;
 
 					const cssText = styleTag.textContent;

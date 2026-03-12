@@ -51,7 +51,7 @@ class RoturExtension {
 
     this.callJson = {};
 
-    fetch("https://raw.githubusercontent.com/Mistium/Origin-lyraOS/main/Resources/info.json")
+    fetch("https://raw.githubusercontent.com/Mistium/Origin-ctrl/main/Resources/info.json")
       .then((response) => {
         if (response.ok) return response.json();
         else throw new Error('Network response was not ok');
@@ -1674,7 +1674,7 @@ async function attemptConnection() {
   } else if (!roturExtension) {
     roturExtension = new RoturExtension();
   }
-  roturExtension.connectToServer({ DESIGNATION: "nva", SYSTEM: "lyraOS", VERSION: "2" });
+  roturExtension.connectToServer({ DESIGNATION: "nva", SYSTEM: "ctrl", VERSION: "2" });
 }
 
 async function logoutofrtr() {
@@ -1711,7 +1711,7 @@ function roturTWEventCall(data) {
           await roturExtension.loginToken({ TOKEN: JSON.parse(localroturdata).token })
         }
       } else {
-        roturExtension.login_prompt({ STYLE_URL: "https://lyra.surf/lyra-dev-repl-rl/libs/roturstyle.css" });
+        roturExtension.login_prompt({ STYLE_URL: "https://ctrl.surf/ctrl-dev-repl-rl/libs/roturstyle.css" });
       }
     })();
   }
