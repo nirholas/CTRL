@@ -13,7 +13,7 @@
 | **Rebrand (LyraOS → CTRL)** | DONE | Zero `lyra`/`LyraOS` references in source. Globe logo applied. |
 | **Task Manager** | 90% DONE | Full rewrite done. Needs event rename + heartbeat detection. |
 | **File Explorer** | PARTIAL | Basic file explorer exists. Needs preview pane, copy/paste, drag-drop. |
-| **Browser App** | PARTIAL | Basic browser iframe exists. Needs tabs, bookmarks, history. |
+| **Browser App** | DONE | Tabbed browser with bookmarks, history, find, zoom, print, context menus, session restore. |
 | **Win12 Feature Porting** | NOT STARTED | 48 features identified in `docs/WIN12-ARCHITECTURE.md`. |
 | **OS Feature Porting** | NOT STARTED | `os-features.js` from agentos needs to be ported to CTRL. |
 

@@ -480,7 +480,6 @@ margin: 4px 0;
 
 /* ─── Side Panel (History / Bookmarks) ─── */
 .side-panel {
-display: none;
 position: absolute;
 top: 0;
 right: 0;
@@ -491,10 +490,15 @@ box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
 z-index: 50;
 flex-direction: column;
 border-left: 1px solid rgba(255, 255, 255, 0.06);
+display: flex;
+transform: translateX(100%);
+transition: transform 0.25s ease;
+pointer-events: none;
 }
 
 .side-panel.open {
-display: flex;
+transform: translateX(0);
+pointer-events: auto;
 }
 
 .side-panel-header {
@@ -734,6 +738,189 @@ color: var(--col-txt1, #888);
 opacity: 0.5;
 font-size: 13px;
 }
+
+/* ─── Tab Overflow Scroll Buttons ─── */
+.tab-scroll-btn {
+width: 20px;
+min-width: 20px;
+height: 28px;
+display: none;
+align-items: center;
+justify-content: center;
+background: var(--col-bg1, #1e1e1e);
+border: none;
+cursor: pointer;
+color: var(--col-txt1, #aaa);
+flex-shrink: 0;
+z-index: 2;
+opacity: 0.7;
+transition: opacity 0.15s;
+padding: 0;
+}
+
+.tab-scroll-btn:hover {
+opacity: 1;
+}
+
+.tab-scroll-btn.visible {
+display: flex;
+}
+
+.tab-scroll-btn .material-symbols-rounded {
+font-size: 16px;
+}
+
+/* ─── Tab Animations ─── */
+.tab {
+animation: tab-slide-in 0.2s ease forwards;
+}
+
+@keyframes tab-slide-in {
+from { opacity: 0; max-width: 0; padding: 0; }
+to { opacity: 1; max-width: 200px; padding: 0 8px; }
+}
+
+.tab.closing {
+animation: tab-slide-out 0.15s ease forwards;
+}
+
+@keyframes tab-slide-out {
+from { opacity: 1; max-width: 200px; padding: 0 8px; }
+to { opacity: 0; max-width: 0; padding: 0; overflow: hidden; }
+}
+
+/* ─── Tab Context Menu ─── */
+.tab-context-menu {
+position: fixed;
+background: var(--col-bg2, #2d2d2d);
+border-radius: 8px;
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+border: 1px solid rgba(255, 255, 255, 0.08);
+z-index: 300;
+min-width: 180px;
+overflow: hidden;
+display: none;
+}
+
+.tab-context-menu.open {
+display: block;
+}
+
+.tab-ctx-item {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 8px 14px;
+cursor: pointer;
+color: var(--col-txt1, #ccc);
+font-size: 12px;
+border: none;
+background: none;
+width: 100%;
+text-align: left;
+transition: background 0.1s;
+}
+
+.tab-ctx-item:hover {
+background: rgba(255, 255, 255, 0.06);
+}
+
+.tab-ctx-item .material-symbols-rounded {
+font-size: 16px;
+opacity: 0.6;
+}
+
+.tab-ctx-divider {
+height: 1px;
+background: rgba(255, 255, 255, 0.08);
+margin: 4px 0;
+}
+
+/* ─── Find Bar ─── */
+.find-bar {
+display: none;
+position: absolute;
+top: 0;
+right: 16px;
+z-index: 60;
+background: var(--col-bg2, #2d2d2d);
+border: 1px solid rgba(255, 255, 255, 0.08);
+border-top: none;
+border-radius: 0 0 10px 10px;
+box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+padding: 8px 12px;
+gap: 6px;
+align-items: center;
+}
+
+.find-bar.open {
+display: flex;
+}
+
+.find-bar input {
+background: var(--col-bg1, #1e1e1e);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 6px;
+color: var(--col-txt1, #e0e0e0);
+font-size: 13px;
+padding: 5px 10px;
+outline: none;
+width: 220px;
+}
+
+.find-bar input:focus {
+border-color: #6179FF;
+}
+
+.find-bar-info {
+font-size: 11px;
+color: var(--col-txt1, #888);
+min-width: 60px;
+text-align: center;
+}
+
+.find-bar .nav-btn {
+width: 24px;
+height: 24px;
+}
+
+.find-bar .nav-btn .material-symbols-rounded {
+font-size: 16px;
+}
+
+/* ─── Zoom Indicator ─── */
+.zoom-indicator {
+position: fixed;
+bottom: 16px;
+right: 16px;
+background: var(--col-bg2, #2d2d2d);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 8px;
+padding: 6px 14px;
+font-size: 12px;
+color: var(--col-txt1, #ccc);
+z-index: 80;
+opacity: 0;
+transition: opacity 0.2s;
+pointer-events: none;
+}
+
+.zoom-indicator.visible {
+opacity: 1;
+}
+
+/* ─── Pinned Tab ─── */
+.tab.pinned {
+min-width: 36px;
+max-width: 36px;
+padding: 0;
+justify-content: center;
+}
+
+.tab.pinned .tab-title,
+.tab.pinned .tab-close {
+display: none;
+}
 </style>
 </head>
 
@@ -741,7 +928,13 @@ font-size: 13px;
 
 <!-- Tab Bar -->
 <div class="tab-bar">
+<button class="tab-scroll-btn" id="tabScrollLeft" title="Scroll tabs left">
+<span class="material-symbols-rounded">chevron_left</span>
+</button>
 <div class="tabs-container" id="tabsContainer"></div>
+<button class="tab-scroll-btn" id="tabScrollRight" title="Scroll tabs right">
+<span class="material-symbols-rounded">chevron_right</span>
+</button>
 <button class="new-tab-btn" onclick="browser.newTab()" title="New tab (Ctrl+T)">
 <span class="material-symbols-rounded">add</span>
 </button>
@@ -804,6 +997,23 @@ onkeydown="browser.onAddressKeydown(event)">
 <button class="menu-item" onclick="browser.toggleBookmarkBar(); browser.closeMenu();">
 <span class="material-symbols-rounded">bookmark</span> Toggle bookmark bar
 </button>
+<div class="menu-divider"></div>
+<button class="menu-item" onclick="browser.zoomIn(); browser.closeMenu();">
+<span class="material-symbols-rounded">zoom_in</span> Zoom in
+</button>
+<button class="menu-item" onclick="browser.zoomOut(); browser.closeMenu();">
+<span class="material-symbols-rounded">zoom_out</span> Zoom out
+</button>
+<button class="menu-item" onclick="browser.zoomReset(); browser.closeMenu();">
+<span class="material-symbols-rounded">fit_screen</span> Reset zoom
+</button>
+<div class="menu-divider"></div>
+<button class="menu-item" onclick="browser.openFindBar(); browser.closeMenu();">
+<span class="material-symbols-rounded">search</span> Find in page
+</button>
+<button class="menu-item" onclick="browser.printPage(); browser.closeMenu();">
+<span class="material-symbols-rounded">print</span> Print
+</button>
 </div>
 </div>
 
@@ -833,6 +1043,34 @@ onkeydown="browser.onAddressKeydown(event)">
 </div>
 <div class="side-panel-body" id="bookmarksList"></div>
 </div>
+
+<!-- Find Bar -->
+<div class="find-bar" id="findBar">
+<input type="text" id="findInput" placeholder="Find in page..." autocomplete="off" spellcheck="false">
+<span class="find-bar-info" id="findInfo"></span>
+<button class="nav-btn" onclick="browser.findPrev()" title="Previous">
+<span class="material-symbols-rounded">expand_less</span>
+</button>
+<button class="nav-btn" onclick="browser.findNext()" title="Next">
+<span class="material-symbols-rounded">expand_more</span>
+</button>
+<button class="nav-btn" onclick="browser.closeFindBar()" title="Close">
+<span class="material-symbols-rounded">close</span>
+</button>
+</div>
+
+<!-- Tab Context Menu -->
+<div class="tab-context-menu" id="tabContextMenu">
+<button class="tab-ctx-item" data-action="duplicate"><span class="material-symbols-rounded">content_copy</span> Duplicate tab</button>
+<button class="tab-ctx-item" data-action="pin"><span class="material-symbols-rounded">push_pin</span> Pin tab</button>
+<div class="tab-ctx-divider"></div>
+<button class="tab-ctx-item" data-action="close"><span class="material-symbols-rounded">close</span> Close tab</button>
+<button class="tab-ctx-item" data-action="closeOthers"><span class="material-symbols-rounded">tab_close</span> Close other tabs</button>
+<button class="tab-ctx-item" data-action="closeRight"><span class="material-symbols-rounded">tab_close_right</span> Close tabs to right</button>
+</div>
+
+<!-- Zoom Indicator -->
+<div class="zoom-indicator" id="zoomIndicator"></div>
 
 <script>
 const browser = (() => {
@@ -1216,12 +1454,16 @@ updateBookmarkIcon();
 function closeTab(id) {
 var idx = tabs.findIndex(function(t) { return t.id === id; });
 if (idx < 0) return;
+// Animate tab closing
+var tabEl = document.querySelector('.tab[data-tab-id="' + id + '"]');
+if (tabEl) tabEl.classList.add("closing");
+setTimeout(function() {
 var panel = document.getElementById("panel_" + id);
 if (panel) {
 releaseIframesInPanel(panel);
 panel.remove();
 }
-tabs.splice(idx, 1);
+tabs.splice(tabs.findIndex(function(t) { return t.id === id; }), 1);
 saveSession();
 if (tabs.length === 0) { newTab(); return; }
 if (activeTabId === id) {
@@ -1230,6 +1472,7 @@ switchTab(tabs[newIdx].id);
 } else {
 renderTabs();
 }
+}, tabEl ? 150 : 0);
 }
 
 function renderTabs() {
@@ -1237,8 +1480,11 @@ var container = document.getElementById("tabsContainer");
 container.innerHTML = "";
 tabs.forEach(function(tab) {
 var div = document.createElement("div");
-div.className = "tab" + (tab.id === activeTabId ? " active" : "");
+div.className = "tab" + (tab.id === activeTabId ? " active" : "") + (tab.pinned ? " pinned" : "");
 div.dataset.tabId = tab.id;
+
+// Right-click context menu
+div.oncontextmenu = function(e) { showTabContextMenu(e, tab.id); };
 
 // Drag to reorder
 div.draggable = true;
@@ -1445,7 +1691,10 @@ bar.style.width = "0";
 }
 
 function getFaviconUrl(url) {
-try { return new URL(url).origin + "/favicon.ico"; }
+try {
+var hostname = new URL(url).hostname;
+return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(hostname) + "&sz=32";
+}
 catch (_) { return null; }
 }
 
@@ -1535,14 +1784,225 @@ function closeSidePanel(name) {
 document.getElementById(name + "Panel").classList.remove("open");
 }
 
+// ── Zoom ──
+var zoomLevel = 100;
+var zoomTimer = null;
+
+function setZoom(level) {
+zoomLevel = Math.max(25, Math.min(500, level));
+var tab = getActiveTab();
+if (!tab) return;
+var panel = document.getElementById("panel_" + tab.id);
+var iframe = panel ? panel.querySelector("iframe") : null;
+if (iframe) iframe.style.transform = zoomLevel === 100 ? "" : "scale(" + (zoomLevel / 100) + ")";
+if (iframe) iframe.style.transformOrigin = zoomLevel === 100 ? "" : "0 0";
+if (iframe && zoomLevel !== 100) {
+iframe.style.width = (100 / (zoomLevel / 100)) + "%";
+iframe.style.height = (100 / (zoomLevel / 100)) + "%";
+} else if (iframe) {
+iframe.style.width = "100%";
+iframe.style.height = "100%";
+}
+showZoomIndicator();
+}
+
+function zoomIn() { setZoom(zoomLevel + 10); }
+function zoomOut() { setZoom(zoomLevel - 10); }
+function zoomReset() { setZoom(100); }
+
+function showZoomIndicator() {
+var el = document.getElementById("zoomIndicator");
+el.textContent = zoomLevel + "%";
+el.classList.add("visible");
+clearTimeout(zoomTimer);
+zoomTimer = setTimeout(function() { el.classList.remove("visible"); }, 1500);
+}
+
+// ── Find in Page ──
+var findQuery = "";
+
+function openFindBar() {
+var bar = document.getElementById("findBar");
+bar.classList.add("open");
+var input = document.getElementById("findInput");
+input.value = findQuery;
+input.focus();
+input.select();
+}
+
+function closeFindBar() {
+document.getElementById("findBar").classList.remove("open");
+findQuery = "";
+document.getElementById("findInfo").textContent = "";
+// Clear selection in iframe
+var tab = getActiveTab();
+if (tab) {
+var panel = document.getElementById("panel_" + tab.id);
+var iframe = panel ? panel.querySelector("iframe") : null;
+if (iframe) {
+try {
+iframe.contentWindow.getSelection().removeAllRanges();
+} catch (_) {}
+}
+}
+}
+
+function findInPage(direction) {
+var input = document.getElementById("findInput");
+findQuery = input.value;
+if (!findQuery) { document.getElementById("findInfo").textContent = ""; return; }
+var tab = getActiveTab();
+if (!tab) return;
+var panel = document.getElementById("panel_" + tab.id);
+var iframe = panel ? panel.querySelector("iframe") : null;
+if (!iframe) {
+document.getElementById("findInfo").textContent = "No page loaded";
+return;
+}
+try {
+var backwards = direction === "prev";
+var found = iframe.contentWindow.find(findQuery, false, backwards, true, false, false, false);
+document.getElementById("findInfo").textContent = found ? "" : "Not found";
+} catch (_) {
+document.getElementById("findInfo").textContent = "Not available";
+}
+}
+
+function findNext() { findInPage("next"); }
+function findPrev() { findInPage("prev"); }
+
+// ── Print ──
+function printPage() {
+var tab = getActiveTab();
+if (!tab) return;
+var panel = document.getElementById("panel_" + tab.id);
+var iframe = panel ? panel.querySelector("iframe") : null;
+if (iframe) {
+try { iframe.contentWindow.print(); }
+catch (_) { window.print(); }
+}
+}
+
+// ── Tab Context Menu ──
+var contextTabId = null;
+
+function showTabContextMenu(e, tabId) {
+e.preventDefault();
+contextTabId = tabId;
+var tab = tabs.find(function(t) { return t.id === tabId; });
+var menu = document.getElementById("tabContextMenu");
+// Update pin label
+var pinBtn = menu.querySelector('[data-action="pin"]');
+if (tab && tab.pinned) {
+pinBtn.innerHTML = '<span class="material-symbols-rounded">push_pin</span> Unpin tab';
+} else {
+pinBtn.innerHTML = '<span class="material-symbols-rounded">push_pin</span> Pin tab';
+}
+menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + "px";
+menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + "px";
+menu.classList.add("open");
+}
+
+function hideTabContextMenu() {
+document.getElementById("tabContextMenu").classList.remove("open");
+contextTabId = null;
+}
+
+function handleTabContextAction(action) {
+if (!contextTabId) return;
+var idx = tabs.findIndex(function(t) { return t.id === contextTabId; });
+var tab = idx >= 0 ? tabs[idx] : null;
+if (!tab) { hideTabContextMenu(); return; }
+
+switch (action) {
+case "close":
+closeTab(contextTabId);
+break;
+case "closeOthers":
+var keep = contextTabId;
+var toClose = tabs.filter(function(t) { return t.id !== keep && !t.pinned; }).map(function(t) { return t.id; });
+toClose.forEach(function(id) { closeTab(id); });
+break;
+case "closeRight":
+var rightTabs = tabs.slice(idx + 1).filter(function(t) { return !t.pinned; }).map(function(t) { return t.id; });
+rightTabs.forEach(function(id) { closeTab(id); });
+break;
+case "duplicate":
+newTab(tab.url || undefined);
+break;
+case "pin":
+tab.pinned = !tab.pinned;
+renderTabs();
+break;
+}
+hideTabContextMenu();
+}
+
+// Wire up context menu actions
+document.getElementById("tabContextMenu").addEventListener("click", function(e) {
+var btn = e.target.closest(".tab-ctx-item");
+if (btn) handleTabContextAction(btn.dataset.action);
+});
+document.addEventListener("click", function() { hideTabContextMenu(); });
+
+// ── Tab Overflow Scroll Buttons ──
+function setupTabScrollButtons() {
+var container = document.getElementById("tabsContainer");
+var leftBtn = document.getElementById("tabScrollLeft");
+var rightBtn = document.getElementById("tabScrollRight");
+
+leftBtn.onclick = function() { container.scrollBy({ left: -150, behavior: "smooth" }); };
+rightBtn.onclick = function() { container.scrollBy({ left: 150, behavior: "smooth" }); };
+
+function updateScrollButtons() {
+var hasOverflow = container.scrollWidth > container.clientWidth + 2;
+leftBtn.classList.toggle("visible", hasOverflow && container.scrollLeft > 2);
+rightBtn.classList.toggle("visible", hasOverflow && container.scrollLeft < container.scrollWidth - container.clientWidth - 2);
+}
+
+container.addEventListener("scroll", updateScrollButtons);
+new ResizeObserver(updateScrollButtons).observe(container);
+// Also update after each renderTabs
+var origRenderTabs = renderTabs;
+renderTabs = function() { origRenderTabs(); requestAnimationFrame(updateScrollButtons); };
+}
+
+// ── Find Bar input wiring ──
+document.getElementById("findInput").addEventListener("keydown", function(e) {
+if (e.key === "Enter") {
+e.preventDefault();
+if (e.shiftKey) findPrev(); else findNext();
+} else if (e.key === "Escape") {
+closeFindBar();
+}
+});
+document.getElementById("findInput").addEventListener("input", function() { findInPage("next"); });
+
 // ── Keyboard shortcuts ──
 document.addEventListener("keydown", function(e) {
-if ((e.ctrlKey || e.metaKey) && e.key === "t") { e.preventDefault(); newTab(); }
-if ((e.ctrlKey || e.metaKey) && e.key === "w") { e.preventDefault(); if (activeTabId) closeTab(activeTabId); }
-if ((e.ctrlKey || e.metaKey) && e.key === "l") { e.preventDefault(); document.getElementById("addressInput").focus(); document.getElementById("addressInput").select(); }
+var ctrl = e.ctrlKey || e.metaKey;
+if (ctrl && e.key === "t") { e.preventDefault(); newTab(); }
+if (ctrl && e.key === "w") { e.preventDefault(); if (activeTabId) closeTab(activeTabId); }
+if (ctrl && e.key === "l") { e.preventDefault(); document.getElementById("addressInput").focus(); document.getElementById("addressInput").select(); }
+if (ctrl && e.key === "f") { e.preventDefault(); openFindBar(); }
+if (ctrl && e.key === "p") { e.preventDefault(); printPage(); }
 if (e.key === "F5") { e.preventDefault(); reload(); }
 if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); goBack(); }
 if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); goForward(); }
+// Ctrl+1-9 tab switching (Ctrl+9 = last tab)
+if (ctrl && e.key >= "1" && e.key <= "9") {
+e.preventDefault();
+var tabIdx = e.key === "9" ? tabs.length - 1 : parseInt(e.key, 10) - 1;
+if (tabIdx >= 0 && tabIdx < tabs.length) switchTab(tabs[tabIdx].id);
+}
+// Zoom shortcuts
+if (ctrl && (e.key === "=" || e.key === "+")) { e.preventDefault(); zoomIn(); }
+if (ctrl && e.key === "-") { e.preventDefault(); zoomOut(); }
+if (ctrl && e.key === "0") { e.preventDefault(); zoomReset(); }
+// Escape closes find bar
+if (e.key === "Escape" && document.getElementById("findBar").classList.contains("open")) {
+closeFindBar();
+}
 });
 
 // Listen for messages from child iframes (e.g. new tab page navigation requests)
@@ -1662,6 +2122,8 @@ if (!launched) {
 var restored = await restoreSession();
 if (!restored) newTab();
 }
+
+setupTabScrollButtons();
 }
 
 return {
@@ -1684,6 +2146,14 @@ showAutocomplete: showAutocomplete,
 hideAutocomplete: hideAutocomplete,
 onAddressInput: onAddressInput,
 onAddressKeydown: onAddressKeydown,
+zoomIn: zoomIn,
+zoomOut: zoomOut,
+zoomReset: zoomReset,
+openFindBar: openFindBar,
+closeFindBar: closeFindBar,
+findNext: findNext,
+findPrev: findPrev,
+printPage: printPage,
 };
 })();
 </script>
