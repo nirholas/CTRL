@@ -351,7 +351,7 @@
 	<!-- Dialogs -->
 	<dialog id="newFileDialog">
 		<label style="display:block;margin-bottom:8px;">New File</label>
-		<input id="newFileName" placeholder="filename.txt" autofocus onkeydown="if(event.key==='Enter'){event.preventDefault();doCreateFile()}">
+		<input id="newFileName" placeholder="filename.txt" autofocus>
 		<span id="newFileError" style="color:#f55;font-size:11px;display:block;margin-top:4px;"></span>
 		<div class="dialog-btns">
 			<button class="btn-cancel" onclick="document.getElementById('newFileDialog').close()">Cancel</button>
@@ -361,7 +361,7 @@
 
 	<dialog id="newFolderDialog">
 		<label style="display:block;margin-bottom:8px;">New Folder in <span id="newFolderPath"></span></label>
-		<input id="newFolderName" placeholder="Folder name" autofocus onkeydown="if(event.key==='Enter'){event.preventDefault();doCreateFolder()}">
+		<input id="newFolderName" placeholder="Folder name" autofocus>
 		<div class="dialog-btns">
 			<button class="btn-cancel" onclick="document.getElementById('newFolderDialog').close()">Cancel</button>
 			<button class="btn-primary" onclick="doCreateFolder()">Create</button>
@@ -424,10 +424,6 @@
 	let draggedFileId = null;
 	let tabIdCounter = 0;
 	let cachedItems = null;
-
-	// Get a unique key for a file/folder item
-	function itemKey(f) { return f.id || f.path || f.name; }
-	function displayName(f) { return removeTrailingSlash(f.name) || f.name; }
 
 	// ── Tab Management ──
 	function createTab(path) {
@@ -784,16 +780,15 @@
 		for (var i = 0; i < items.length; i++) {
 			var file = items[i];
 			var el = document.createElement('div');
-			var key = itemKey(file);
-			el.className = 'file-item-grid' + (selectedFiles.has(key) ? ' selected' : '');
-			el.setAttribute('data-id', key);
+			el.className = 'file-item-grid' + (selectedFiles.has(file.id) ? ' selected' : '');
+			el.setAttribute('data-id', file.id || '');
 			el.setAttribute('data-path', file.path || '');
 			el.setAttribute('data-name', file.name);
 			el.setAttribute('data-index', i);
 			el.setAttribute('data-type', file.type || '');
 
 			var isFolder = file.type === 'folder';
-			var ext = isFolder ? '' : getExt(file.name);
+			var ext = getExt(file.name);
 
 			var iconDiv = document.createElement('div');
 			iconDiv.className = 'file-icon';
@@ -816,7 +811,7 @@
 
 			var nameDiv = document.createElement('div');
 			nameDiv.className = 'file-name';
-			nameDiv.textContent = displayName(file);
+			nameDiv.textContent = file.name;
 			el.appendChild(nameDiv);
 
 			setupFileItemEvents(el, file, i, isFolder);
@@ -860,16 +855,15 @@
 		for (var i = 0; i < items.length; i++) {
 			var file = items[i];
 			var el = document.createElement('div');
-			var key = itemKey(file);
-			el.className = 'file-item-list' + (selectedFiles.has(key) ? ' selected' : '');
-			el.setAttribute('data-id', key);
+			el.className = 'file-item-list' + (selectedFiles.has(file.id) ? ' selected' : '');
+			el.setAttribute('data-id', file.id || '');
 			el.setAttribute('data-path', file.path || '');
 			el.setAttribute('data-name', file.name);
 			el.setAttribute('data-index', i);
 			el.setAttribute('data-type', file.type || '');
 
 			var isFolder = file.type === 'folder';
-			var ext = isFolder ? '' : getExt(file.name);
+			var ext = getExt(file.name);
 
 			var iconDiv = document.createElement('div');
 			iconDiv.className = 'file-icon';
@@ -878,7 +872,7 @@
 
 			var nameDiv = document.createElement('div');
 			nameDiv.className = 'file-name';
-			nameDiv.textContent = displayName(file);
+			nameDiv.textContent = file.name;
 			el.appendChild(nameDiv);
 
 			var typeDiv = document.createElement('div');
@@ -932,7 +926,7 @@
 
 	// ── Selection ──
 	function handleItemClick(file, index, event) {
-		var id = itemKey(file);
+		var id = file.id;
 
 		if (event.shiftKey && lastClickedIndex !== null) {
 			var start = Math.min(lastClickedIndex, index);
@@ -941,8 +935,8 @@
 			document.querySelectorAll('[data-index]').forEach(function(el) {
 				var idx = parseInt(el.getAttribute('data-index'));
 				if (idx >= start && idx <= end) {
-					var k = el.getAttribute('data-id');
-					if (k) selectedFiles.add(k);
+					var fid = el.getAttribute('data-id');
+					if (fid) selectedFiles.add(fid);
 				}
 			});
 		} else if (event.ctrlKey || event.metaKey) {
@@ -995,8 +989,8 @@
 
 	function selectAll() {
 		document.querySelectorAll('[data-id]').forEach(function(el) {
-			var k = el.getAttribute('data-id');
-			if (k) selectedFiles.add(k);
+			var id = el.getAttribute('data-id');
+			if (id) selectedFiles.add(id);
 		});
 		updateSelectionUI();
 		document.getElementById('statusText').textContent = selectedFiles.size + ' items selected';
@@ -1181,7 +1175,6 @@
 		document.getElementById('deleteDialog').close();
 		for (var i = 0; i < pendingDeleteIds.length; i++) {
 			var id = pendingDeleteIds[i];
-			// Folder paths end with '/', file ids don't
 			if (pendingDeleteIsFolder || id.endsWith('/')) await window.parent.remfolder(id);
 			else await window.parent.remfile(id);
 		}
@@ -1358,18 +1351,11 @@
 		if (e.ctrlKey && e.key === 'c') { e.preventDefault(); clipboardOp('copy'); }
 		if (e.ctrlKey && e.key === 'x') { e.preventDefault(); clipboardOp('cut'); }
 		if (e.ctrlKey && e.key === 'v') { e.preventDefault(); doPaste(); }
-		if (e.key === 'Delete' && selectedFiles.size > 0) {
-			var delKeys = Array.from(selectedFiles);
-			var hasFolder = delKeys.some(function(k) {
-				var el = document.querySelector('[data-id="' + k + '"]');
-				return el && el.getAttribute('data-type') === 'folder';
-			});
-			promptDelete(delKeys, hasFolder);
-		}
+		if (e.key === 'Delete' && selectedFiles.size > 0) promptDelete(Array.from(selectedFiles));
 		if (e.key === 'F2' && selectedFiles.size === 1) {
 			var id = Array.from(selectedFiles)[0];
 			var el = document.querySelector('[data-id="' + id + '"]');
-			if (el && el.getAttribute('data-type') !== 'folder') startInlineRename({ id: id, name: el.getAttribute('data-name') });
+			if (el) startInlineRename({ id: id, name: el.getAttribute('data-name') });
 		}
 		if (e.key === 'F5') { e.preventDefault(); refresh(); }
 		if (e.altKey && e.key === 'ArrowUp') { e.preventDefault(); goUp(); }
@@ -1377,9 +1363,9 @@
 		if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); goForward(); }
 		if (e.key === 'Enter' && selectedFiles.size > 0) {
 			var sid = Array.from(selectedFiles)[0];
-			var selEl = document.querySelector('[data-id="' + sid + '"]');
-			if (selEl) {
-				if (selEl.getAttribute('data-type') === 'folder') navigate(selEl.getAttribute('data-path'));
+			var sel = document.querySelector('[data-id="' + sid + '"]');
+			if (sel) {
+				if (sel.getAttribute('data-type') === 'folder') navigate(sel.getAttribute('data-path'));
 				else window.parent.openfile(sid);
 			}
 		}

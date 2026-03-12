@@ -329,6 +329,43 @@ Every selector using `backdrop-filter`, with exact values:
 | `rotate` | `desktop.css:2723-2730` | Shutdown icon rotation: `0deg` → `-90deg` | 1s cubic-bezier(0.77,0.02,0.16,1.04) |
 | `eyea` | `bluescreen.html` | BSOD sad-face eye movement | Multi-step position animation |
 
+#### Key @keyframes Definitions
+
+```css
+/* @keyframes fcl — login cloud float (desktop.css:120-123) */
+@keyframes fcl {
+    0%   { transform: translateX(-200px); }
+    100% { transform: translateX(200px); }
+}
+
+/* @keyframes task-show — taskbar icon appear (desktop.css:125-128) */
+@keyframes task-show {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+}
+
+/* @keyframes task-hide — taskbar icon disappear (desktop.css:130-133) */
+@keyframes task-hide {
+    from { transform: none; opacity: 1; }
+    to   { transform: translateY(20px); opacity: 0; }
+}
+
+/* @keyframes rotate — shutdown icon spin (desktop.css:2723-2730) */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-90deg); }
+}
+
+/* @keyframes eyea — BSOD sad-face eye movement (bluescreen.html) */
+@keyframes eyea {
+    0%   { left: 4px; top: 14px; }
+    25%  { left: 6px; top: 16px; }
+    50%  { left: 2px; top: 14px; }
+    75%  { left: 4px; top: 12px; }
+    100% { left: 4px; top: 14px; }
+}
+```
+
 ### Transition Patterns
 
 Common transition declarations used throughout:
@@ -518,10 +555,17 @@ $.getJSON('https://tjy-gitnub.github.io/win12-theme/def.json').then(j => {
 
 ### Window Lifecycle
 
-#### `showwin(name)` — Open/Show a Window
+#### `showwin(name)` / `newwin` — Open/Show a Window
+
+win12 does not have a standalone `newwin()` factory. Instead, window DOM is
+pre-defined in `desktop.html` and `showwin(name)` makes it visible. The term
+"newwin" is used in this document as shorthand for the combined "create +
+show" sequence that `openapp()` orchestrates: it first ensures the window DOM
+exists, then calls `showwin()`. Future porting agents should treat `showwin()`
+as the `newwin` equivalent.
 
 ```javascript
-// window.js lines 1-35
+// window.js lines 1-35  (alias: newwin pattern)
 function showwin(name) {
     $('.window.' + name).addClass('show-begin');
     setTimeout(() => {
@@ -2072,7 +2116,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 | win12 Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
-| `showwin(name)` | `window.js:1-35` | `windman.js` `initializeWindowState()` + `createWindowShell()` | ctrl creates windows dynamically; win12 toggles pre-existing DOM |
+| `showwin(name)` (aka newwin) | `window.js:1-35` | `windman.js` `initializeWindowState()` + `createWindowShell()` | ctrl creates windows dynamically; win12 toggles pre-existing DOM. win12 has no standalone `newwin()` — `openapp()` + `showwin()` together form the newwin pattern |
 | `hidewin(name)` | `window.js:37-70` | `windman.js` window close handler | ctrl removes iframe + DOM; win12 hides with CSS |
 | `maxwin(name)` | `window.js:72-103` | `windman.js` maximize handler | ctrl `calculateWindowSize()` computes dimensions |
 | `minwin(name)` | `window.js:105-125` | MISSING — must build | ctrl lacks minimize-to-taskbar |
