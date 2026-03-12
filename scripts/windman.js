@@ -469,9 +469,10 @@ function dragElement(elmnt) {
     let holdStart = 0;
     const snappingIndicator = document.getElementById('snappingIndicator');
     const snappingDivs = Array.from(document.querySelectorAll('.snappingDiv'));
-    console.log(elmnt.id)
+    const snapPreview = document.getElementById('snap-preview');
+    let currentSnapZone = '';
+
     if (gid(elmnt.id + "header")) {
-        console.log(gid(elmnt.id + "header"))
         gid(elmnt.id + "header").onmousedown = dragMouseDown;
     }
 
@@ -485,6 +486,7 @@ function dragElement(elmnt) {
         grabOffsetY = e.clientY - elmnt.getBoundingClientRect().top;
         elmnt.style.position = 'absolute';
         elmnt.classList.add('notrans');
+        currentSnapZone = '';
 
         iframeOverlay = document.createElement('div');
         iframeOverlay.style.position = 'fixed';
@@ -523,12 +525,38 @@ function dragElement(elmnt) {
                 e.clientY >= rect.top && e.clientY <= rect.bottom;
             div.style.opacity = isHovered ? 0.8 : 0.2;
         });
+
+        // Win12-style snap preview
+        if (snapPreview) {
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+            var edgeX = vw * 0.03;
+            var edgeY = vh * 0.03;
+            var zone = '';
+
+            if (e.clientY < edgeY) {
+                zone = 'snap-max';
+            } else if (e.clientX < edgeX) {
+                zone = 'snap-left';
+            } else if (e.clientX > vw - edgeX) {
+                zone = 'snap-right';
+            }
+
+            if (zone && zone !== currentSnapZone) {
+                snapPreview.className = zone + ' visible';
+                currentSnapZone = zone;
+            } else if (!zone && currentSnapZone) {
+                snapPreview.className = '';
+                currentSnapZone = '';
+            }
+        }
     }
 
     function closeDragElement(e) {
         document.onmouseup = null;
         document.onmousemove = null;
         elmnt.classList.remove('notrans');
+        currentSnapZone = '';
 
         if (iframeOverlay) {
             document.body.removeChild(iframeOverlay);
@@ -537,6 +565,10 @@ function dragElement(elmnt) {
 
         if (snappingIndicator) {
             snappingIndicator.style.display = "none";
+        }
+
+        if (snapPreview) {
+            snapPreview.className = '';
         }
 
         snappingDivs.forEach(div => {

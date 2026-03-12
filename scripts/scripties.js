@@ -7,6 +7,7 @@ var globalmimeDb = null;
 function updateNavSize() {
 	navheight = parseFloat(getComputedStyle(gid("ctrlnav")).height);
 	navheight = navheight + (0.3 * remToPx);
+	document.documentElement.style.setProperty('--nav-height', navheight + 'px');
 }
 
 // more stuff

@@ -3220,6 +3220,120 @@ dialog.scalableui {
 	background: var(--mica);
 }
 
+/* ══════════════════════════════════════════════
+   Win12-Style Title Bar Focus/Unfocus
+   Unfocused windows dim their title bar like Win12
+   ══════════════════════════════════════════════ */
+.windowheader {
+	opacity: 0.5;
+	transition: opacity 150ms var(--ease-decel);
+}
+.window.windowontop > .windowheader {
+	opacity: 1;
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Title Bar Buttons (.wbtg pattern)
+   Close button gets red hover, all get proper sizing
+   ══════════════════════════════════════════════ */
+.ibtnsside button.winclosebtn:hover {
+	background-color: #d80d1c !important;
+	color: #fff !important;
+}
+.ibtnsside button.winclosebtn:hover span {
+	color: #fff;
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Input Focus Accent Border
+   Inputs get accent gradient bottom border on focus
+   ══════════════════════════════════════════════ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select {
+	border-bottom: 2.5px solid transparent;
+	transition: border-color 100ms, background 100ms, box-shadow 100ms;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+textarea:focus {
+	border-image: linear-gradient(90deg, var(--theme-1), var(--theme-2)) 1;
+	border-image-slice: 0 0 1 0;
+	box-shadow: 0 1px 10px var(--s3d);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Accent Gradient Buttons
+   Submit/primary actions use accent gradient
+   ══════════════════════════════════════════════ */
+button.accent,
+.btn-accent,
+.buttons > .submit {
+	background-image: linear-gradient(120deg, var(--theme-1), var(--theme-2));
+	color: #fff;
+	border: none;
+	border-radius: 7px;
+	padding: 6px 14px;
+	cursor: pointer;
+	transition: filter 80ms, transform 80ms;
+}
+button.accent:hover,
+.btn-accent:hover,
+.buttons > .submit:hover {
+	filter: brightness(1.15);
+}
+button.accent:active,
+.btn-accent:active,
+.buttons > .submit:active {
+	filter: brightness(0.9);
+	transform: scale(0.97);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Active Press Feedback
+   Elements get subtle opacity on press
+   ══════════════════════════════════════════════ */
+.act:active,
+[navobj]:active,
+.app-shortcut:active,
+.ctxmenuitem:active,
+.notifpan:active {
+	filter: opacity(0.7);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Toast Notification Glass
+   ══════════════════════════════════════════════ */
+.toastInner {
+	backdrop-filter: blur(20px) saturate(1.5);
+	-webkit-backdrop-filter: blur(20px) saturate(1.5);
+	background: var(--cm) !important;
+	border: 1px solid var(--glass-border-col);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Loading Spinner
+   Dual-circle SVG spinner for windows and panels
+   ══════════════════════════════════════════════ */
+@keyframes win12-spin {
+	0%   { stroke-dasharray: 0.01px, 43.97px; transform: rotate(0deg); }
+	50%  { stroke-dasharray: 21.99px, 21.99px; transform: rotate(450deg); }
+	to   { stroke-dasharray: 0.01px, 43.97px; transform: rotate(1080deg); }
+}
+
+.win12-spinner circle:last-child {
+	fill: none;
+	stroke: var(--theme-2);
+	stroke-width: 3px;
+	stroke-linecap: round;
+	animation: win12-spin 1.5s ease-in-out infinite;
+}
+
+.win12-spinner circle:first-child {
+	fill: none;
+	stroke: var(--cm);
+	stroke-width: 3px;
+}
+
 /* Accessibility: Screen reader only */
 .sr-only {
 	position: absolute;
