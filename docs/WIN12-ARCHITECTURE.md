@@ -1,8 +1,8 @@
 # WIN12-ARCHITECTURE.md — Comprehensive Reference
 
-> **Purpose**: Single source of truth for porting win12 UI features into ctrl.
+> **Purpose**: Single source of truth for porting CTRL UI features into ctrl.
 > Every CSS value, class name, function name, and DOM ID cited here is verified
-> against the actual win12 source at `/workspaces/swarms/win12/`.
+> against the actual CTRL source at `/workspaces/swarms/CTRL/`.
 
 ---
 
@@ -21,7 +21,7 @@
 - [Section K: i18n System](#section-k-i18n-system)
 - [Section L: Audio System](#section-l-audio-system)
 - [Section M: Boot & Login Sequence](#section-m-boot--login-sequence)
-- [Section N: Mapping Table — win12 → ctrl Equivalents](#section-n-mapping-table--win12--ctrl-equivalents)
+- [Section N: Mapping Table — CTRL → ctrl Equivalents](#section-n-mapping-table--CTRL--ctrl-equivalents)
 - [Section O: Porting Complexity Assessment](#section-o-porting-complexity-assessment)
 
 ---
@@ -31,7 +31,7 @@
 ### Core Files (must-read for porting)
 
 ```
-win12/
+CTRL/
 ├── desktop.html          (500 lines)  Main shell: all DOM containers, CSS/JS load order
 ├── desktop.js            (2546 lines) Core desktop logic: start menu, context menus, taskbar,
 │                                      theme, search, login, openapp(), copilot AI, voice
@@ -71,7 +71,7 @@ win12/
 ### Asset Files (images/fonts — not for porting)
 
 ```
-win12/
+CTRL/
 ├── icon/                              App icons (SVG/PNG): setting.svg, edge.svg, calc.svg, etc.
 ├── img/                               Background images, Bing logo, UI assets
 ├── fonts/                             dos.ttf (BIOS font), other custom fonts
@@ -214,7 +214,7 @@ URL load
              │     ├── setIcon() — restore desktop icons
              │     ├── Attach window event handlers (drag, resize, focus)
              │     ├── Inject resize knobs into all .window>.resize-bar
-             │     ├── Fetch remote theme from tjy-gitnub/win12-theme
+             │     ├── Fetch remote theme from tjy-gitnub/CTRL-theme
              │     ├── updateVoiceBallStatus()
              │     └── checkOrientation()
              ├── #loginback shows (full-screen login)
@@ -472,10 +472,10 @@ $(':root').css('--theme-1', localStorage.getItem('color1'));
 $(':root').css('--theme-2', localStorage.getItem('color2'));
 ```
 
-**Remote themes** from `tjy-gitnub/win12-theme` GitHub repo:
+**Remote themes** from `tjy-gitnub/CTRL-theme` GitHub repo:
 ```javascript
 // desktop.js body.onload handler
-$.getJSON('https://tjy-gitnub.github.io/win12-theme/def.json').then(j => {
+$.getJSON('https://tjy-gitnub.github.io/CTRL-theme/def.json').then(j => {
     if (j.sp) {
         $(':root').css('--bgul', j.bg);          // Custom wallpaper
         if (j.spth) {
@@ -557,7 +557,7 @@ $.getJSON('https://tjy-gitnub.github.io/win12-theme/def.json').then(j => {
 
 #### `showwin(name)` / `newwin` — Open/Show a Window
 
-win12 does not have a standalone `newwin()` factory. Instead, window DOM is
+CTRL does not have a standalone `newwin()` factory. Instead, window DOM is
 pre-defined in `desktop.html` and `showwin(name)` makes it visible. The term
 "newwin" is used in this document as shorthand for the combined "create +
 show" sequence that `openapp()` orchestrates: it first ensures the window DOM
@@ -958,7 +958,7 @@ function openapp(name) {
                 oncontextmenu="return showcm(event,'taskbar','${name}')"
                 onmouseenter="showTaskbarPreview('${name}', event)"
                 onmouseleave="hideTaskbarPreview()"
-                win12_title="${name}">
+                CTRL_title="${name}">
                 <img src="${geticon(name)}">
             </a>`
         );
@@ -1523,7 +1523,7 @@ function openapp(name) {
     if (!$('#taskbar>.' + name).length) {
         $('#taskbar').attr('count', Number($('#taskbar').attr('count')) + 1);
         $('#taskbar').append(`<a class="a ${name}" onclick="taskbarclick('${name}')"
-            win12_title="${name}"><img src="${geticon(name)}"></a>`);
+            CTRL_title="${name}"><img src="${geticon(name)}"></a>`);
         $('#taskbar').css('width', 4 + $('#taskbar').attr('count') * 38);
     }
 
@@ -1609,7 +1609,7 @@ function geticon(name) {
 | `bilibili` | `bilibili.com` | Chinese video platform |
 | `copilot` | Built-in Qwen API chat | AI assistant |
 | `minesweeper` | Local HTML file | Classic game |
-| `windows12` | `./boot.html` | Recursive — win12 inside win12 |
+| `windows12` | `./boot.html` | Recursive — CTRL inside CTRL |
 | `wsa` | (stub) | Android subsystem placeholder |
 
 ### Tab System — `m_tab` Object
@@ -1850,7 +1850,7 @@ When disabled, utility classes are toggled on `<html>`:
 apps.setting = {
     init: () => { /* show settings home page */ },
     theme_get: () => {
-        // Fetch themes from GitHub: tjy-gitnub/win12-theme
+        // Fetch themes from GitHub: tjy-gitnub/CTRL-theme
         // List available theme packages with preview
     },
     theme_set: (theme) => {
@@ -2054,7 +2054,7 @@ The codebase has these potential sound integration points:
      │     ├── For each .titbar: set oncontextmenu, ondblclick → maxwin()
      │     └── For each .titbar .icon: set onclick → title bar context menu
      ├── Inject resize knobs into all .window>.resize-bar (8 per window)
-     ├── Fetch remote theme: $.getJSON('tjy-gitnub.github.io/win12-theme/def.json')
+     ├── Fetch remote theme: $.getJSON('tjy-gitnub.github.io/CTRL-theme/def.json')
      ├── updateVoiceBallStatus()
      ├── checkOrientation() — show portrait warning on mobile
      │
@@ -2107,22 +2107,22 @@ The codebase has these potential sound integration points:
 
 ---
 
-## Section N: Mapping Table — win12 → ctrl Equivalents
+## Section N: Mapping Table — CTRL → ctrl Equivalents
 
-This is the rosetta stone for porting. Every significant win12 component is
+This is the rosetta stone for porting. Every significant CTRL component is
 mapped to its ctrl equivalent (or marked as MISSING).
 
 ### Window Management
 
-| win12 Component | File:Line | ctrl Equivalent | Notes |
+| CTRL Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
-| `showwin(name)` (aka newwin) | `window.js:1-35` | `windman.js` `initializeWindowState()` + `createWindowShell()` | ctrl creates windows dynamically; win12 toggles pre-existing DOM. win12 has no standalone `newwin()` — `openapp()` + `showwin()` together form the newwin pattern |
-| `hidewin(name)` | `window.js:37-70` | `windman.js` window close handler | ctrl removes iframe + DOM; win12 hides with CSS |
+| `showwin(name)` (aka newwin) | `window.js:1-35` | `windman.js` `initializeWindowState()` + `createWindowShell()` | ctrl creates windows dynamically; CTRL toggles pre-existing DOM. CTRL has no standalone `newwin()` — `openapp()` + `showwin()` together form the newwin pattern |
+| `hidewin(name)` | `window.js:37-70` | `windman.js` window close handler | ctrl removes iframe + DOM; CTRL hides with CSS |
 | `maxwin(name)` | `window.js:72-103` | `windman.js` maximize handler | ctrl `calculateWindowSize()` computes dimensions |
 | `minwin(name)` | `window.js:105-125` | MISSING — must build | ctrl lacks minimize-to-taskbar |
 | `focwin(name)` | `window.js` | `windman.js` focus handler + `script.js` `nowapp` | ctrl tracks focus in `nowapp` global |
-| `wo[]` array | `window.js` | `script.js` `winds{}` object | ctrl uses object keyed by app name; win12 uses ordered array |
-| `orderwin()` z-index assignment | `window.js` | MISSING — implicit via DOM order | ctrl doesn't explicitly set z-index like win12 |
+| `wo[]` array | `window.js` | `script.js` `winds{}` object | ctrl uses object keyed by app name; CTRL uses ordered array |
+| `orderwin()` z-index assignment | `window.js` | MISSING — implicit via DOM order | ctrl doesn't explicitly set z-index like CTRL |
 | `resizewin()` 8-direction resize | `window.js:127-200` | MISSING — must build | ctrl windows are not resizable |
 | Window drag / snap | `window.js:250-400` | `windman.js` snapping indicators | ctrl has snap zones but different implementation |
 | `#window-fill` snap preview | `desktop.css` | `windman.js` snapping indicator divs | Similar concept, different DOM approach |
@@ -2133,7 +2133,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### Desktop Shell
 
-| win12 Component | File:Line | ctrl Equivalent | Notes |
+| CTRL Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
 | `desktop.html` shell | `desktop.html` full | `index.html` + `style.css` | ctrl uses `#main`, `#workspace` containers |
 | `openapp(name)` | `desktop.js:1650-1730` | `script.js` `openApp()` or `kernel.js` `openlaunchprotocol()` | ctrl opens apps as iframes via NTXSession |
@@ -2153,7 +2153,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### CSS Visual System
 
-| win12 Component | CSS Property/Value | ctrl Equivalent | Notes |
+| CTRL Component | CSS Property/Value | ctrl Equivalent | Notes |
 |---|---|---|---|
 | `:root` CSS variables (light) | `desktop.css:1-40` | `ctrl.css` variables | ctrl has `--col-bg1:#101010`, `--col-txt1:#FFFFFF` etc. (dark-only) |
 | `:root.dark` CSS variables | `desktop.css:43-72` | `ctrl.css` — default (dark theme) | ctrl is dark-only; needs light mode addition |
@@ -2169,11 +2169,11 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### App Architecture
 
-| win12 Component | File:Line | ctrl Equivalent | Notes |
+| CTRL Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
 | `apps` global object | `apps.js` | `script.js` `winds{}` + iframe apps in `appdata/` | ctrl apps are isolated iframes |
 | `apps.*.init()` lifecycle | `apps.js` per app | `NTXSession` class init | ctrl uses NTX API for app lifecycle |
-| `apps.explorer` file browser | `apps.js:850-1400` | `appdata/files.html` | ctrl uses IndexedDB virtual FS; win12 uses JS object tree |
+| `apps.explorer` file browser | `apps.js:850-1400` | `appdata/files.html` | ctrl uses IndexedDB virtual FS; CTRL uses JS object tree |
 | `apps.setting` settings | `apps.js:1-100` | MISSING — must build | ctrl has no settings UI |
 | `apps.taskmgr` task manager | `apps.js:250-500` | MISSING — must build | No task/process manager |
 | `apps.edge` browser | `apps.js:1600-2000` | MISSING — must build | No built-in web browser |
@@ -2186,7 +2186,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### Infrastructure / IPC
 
-| win12 Component | File:Line | ctrl Equivalent | Notes |
+| CTRL Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
 | `localStorage` persistence | `desktop.js` throughout | `system32.js` IndexedDB + encrypted storage | ctrl uses more sophisticated per-user storage |
 | Direct DOM manipulation | All JS files | `NTXSession` API (`ntx.js`) | ctrl apps communicate via message-passing API |
@@ -2199,7 +2199,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### Widgets
 
-| win12 Component | File:Line | ctrl Equivalent | Notes |
+| CTRL Component | File:Line | ctrl Equivalent | Notes |
 |---|---|---|---|
 | `widgets` object | `widget.js` full | MISSING — must build | No widget system |
 | Widget panel (`#widgets`) | `desktop.html/css` | MISSING — must build | No widget side panel |
@@ -2212,7 +2212,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 
 ### Boot / Login
 
-| win12 Component | File | ctrl Equivalent | Notes |
+| CTRL Component | File | ctrl Equivalent | Notes |
 |---|---|---|---|
 | BIOS simulator | `bios.html` + `bios_kernel.js` | MISSING — could add (novelty) | Not needed for core functionality |
 | Boot progress bar | `boot.html` + `boot_kernel.js` | `script.js` login system | ctrl shows login directly |
@@ -2238,16 +2238,16 @@ mapped to its ctrl equivalent (or marked as MISSING).
 |---|---|---|---|---|
 | **Glass/blur effects** | CSS-only | Low | None — just add `backdrop-filter` rules to `ctrl.css` | High |
 | **Dark/light mode toggle** | JS+CSS | Medium | Need light-mode CSS variables + toggle function + localStorage | High |
-| **Root CSS variables** (full set) | CSS-only | Low | Extend `ctrl.css` :root with win12 variable names | High |
+| **Root CSS variables** (full set) | CSS-only | Low | Extend `ctrl.css` :root with CTRL variable names | High |
 | **Theme accent colors** | JS+CSS | Medium | Add `--theme-1/2`, color picker, localStorage persistence | High |
 | **Scrollbar styling update** | CSS-only | Low | Update existing ctrl.css scrollbar rules | Low |
 | **Utility classes** (`.nobr`, `.nosd`, `.notrans`) | CSS-only | Low | Add to ctrl.css | Medium |
 | **Window show/hide animation** | CSS-only | Low | Add show-begin/show class sequence + transitions | High |
 | **Window minimize** | JS+CSS | Medium | Add `.min` class + minwin() function + taskbar integration | High |
-| **Window maximize** | JS+CSS | Low | Update `windman.js` maximize to match win12 position save/restore | Medium |
+| **Window maximize** | JS+CSS | Low | Update `windman.js` maximize to match CTRL position save/restore | Medium |
 | **Window resize** (8-direction) | JS+CSS | High | Build resize-knob system in `windman.js` | Medium |
 | **Window snap** (half-screen) | JS+CSS | Medium | Add `.left`/`.right` classes + snap detection in drag handler | Medium |
-| **Z-order management** | JS+CSS | Medium | Implement explicit z-index management like win12's `orderwin()` | Medium |
+| **Z-order management** | JS+CSS | Medium | Implement explicit z-index management like CTRL's `orderwin()` | Medium |
 | **Snap preview overlay** | JS+CSS | Medium | Create `#window-fill` equivalent with animation | Low |
 | **Taskbar glass + gradient indicator** | CSS-only | Low | Style `<nav>` with dock styling | High |
 | **Taskbar app icon add/remove** | JS+CSS | Medium | Manage dynamic icons on app open/close | High |
@@ -2255,7 +2255,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 | **Taskbar hover preview** | JS+CSS | High | Clone window content, scale preview | Low |
 | **Start menu** | Architecture | High | New panel with app list, pinned grid, search, show/hide animation | High |
 | **Search panel** | JS+CSS | Medium | New panel with search input and result rendering | Medium |
-| **Context menu visual update** | CSS-only | Low | Update `ctxmenu.js` styling to match win12 glass | High |
+| **Context menu visual update** | CSS-only | Low | Update `ctxmenu.js` styling to match CTRL glass | High |
 | **Context menu submenu support** | JS+CSS | Medium | Add nested menu rendering | Medium |
 | **Dropdown menu system** | JS+CSS | Medium | Build `#dp` equivalent for app menubars | Low |
 | **Tooltip system** | JS+CSS | Low | New `#descp` element + show/hide on hover | Low |
@@ -2280,7 +2280,7 @@ mapped to its ctrl equivalent (or marked as MISSING).
 | **Tab system** | JS+CSS | High | Build tab bar component usable by any window | Medium |
 | **PWA support** | Architecture | Medium | Service worker registration + manifest | Low |
 | **i18n system** | Architecture | High | Need framework + translation files for all strings | Medium |
-| **Login screen visual update** | CSS-only | Low | Update login styling to match win12 aesthetic | Medium |
+| **Login screen visual update** | CSS-only | Low | Update login styling to match CTRL aesthetic | Medium |
 | **Boot sequence** | JS+CSS | Low | Add loading animation before desktop shows | Low |
 | **Shutdown sequence** | JS+CSS | Low | Gradient fade + spinner on shutdown | Low |
 | **BIOS simulator** | New app | Low | Novelty — retro terminal interface | Low |
@@ -2479,6 +2479,6 @@ simulating frosted glass over the desktop. It's an alternative to the standard
 
 ---
 
-*Document generated from win12 source files at `/workspaces/swarms/win12/`.
+*Document generated from CTRL source files at `/workspaces/swarms/CTRL/`.
 All CSS values, class names, function names, and DOM IDs are verified against
 actual source code.*
