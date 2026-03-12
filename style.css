@@ -3192,6 +3192,12 @@ dialog.scalableui {
 	            background 0ms;
 }
 
+/* Hide resize handles when maximized */
+.window.max .resize-bar,
+.window.max .knob {
+	display: none !important;
+}
+
 /* Remember maximized-before-minimize */
 .window.min-max {
 	/* Marker class only — used by JS to restore to max state */
@@ -3332,4 +3338,372 @@ button.accent:active,
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Snap Preview Overlay
+   ══════════════════════════════════════════════ */
+#snap-preview {
+	position: fixed;
+	z-index: 90;
+	pointer-events: none;
+	backdrop-filter: blur(25px);
+	-webkit-backdrop-filter: blur(25px);
+	background: var(--fill, rgba(255, 255, 255, 0.15));
+	border: 2px solid var(--glass-border-col);
+	border-radius: 10px;
+	opacity: 0;
+	transition: opacity 200ms var(--ease-decel),
+	            top 200ms var(--ease-decel),
+	            left 200ms var(--ease-decel),
+	            width 200ms var(--ease-decel),
+	            height 200ms var(--ease-decel);
+}
+
+#snap-preview.visible {
+	opacity: 1;
+}
+
+#snap-preview.snap-max {
+	top: 4px;
+	left: 4px;
+	width: calc(100% - 8px);
+	height: calc(100% - 8px);
+}
+
+#snap-preview.snap-left {
+	top: 4px;
+	left: 4px;
+	width: calc(50% - 6px);
+	height: calc(100% - 8px);
+}
+
+#snap-preview.snap-right {
+	top: 4px;
+	left: calc(50% + 2px);
+	width: calc(50% - 6px);
+	height: calc(100% - 8px);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Notification Banner (slide from bottom-right)
+   ══════════════════════════════════════════════ */
+#notification {
+	backdrop-filter: blur(50px) saturate(1.3);
+	-webkit-backdrop-filter: blur(50px) saturate(1.3);
+	background: var(--bg70) !important;
+	border: 1px solid var(--glass-border-col) !important;
+	box-shadow: var(--shadow-focus) !important;
+	border-radius: 12px !important;
+	animation: notifSlideIn 400ms 200ms var(--ease-decel) both !important;
+}
+
+@keyframes notifSlideIn {
+	from {
+		opacity: 0;
+		transform: translateX(40px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Toast Notification (slide from bottom)
+   ══════════════════════════════════════════════ */
+#toastdiv.notifpullanim {
+	animation: toastSlideIn 400ms 200ms var(--ease-decel) both;
+}
+
+@keyframes toastSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+#toastdiv.closeEffect {
+	animation: none;
+	opacity: 0;
+	transform: translateY(10px) scale(0.96);
+	transition: opacity 200ms var(--ease-decel),
+	            transform 200ms var(--ease-decel);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Start Menu / App Launcher Animation
+   ══════════════════════════════════════════════ */
+#appdmod {
+	transition: opacity 200ms var(--ease-decel),
+	            transform 200ms var(--ease-decel);
+}
+
+#appdmod[open] {
+	animation: startMenuIn 200ms var(--ease-decel);
+}
+
+@keyframes startMenuIn {
+	from {
+		opacity: 0;
+		transform: scale(0.92) translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* Search panel animation */
+#searchwindow[open] {
+	animation: startMenuIn 200ms var(--ease-decel);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Calendar / Date Popup
+   ══════════════════════════════════════════════ */
+#datebox {
+	position: fixed;
+	right: 10px;
+	bottom: 60px;
+	width: 320px;
+	z-index: 91;
+	display: none;
+	backdrop-filter: blur(50px) saturate(1.5);
+	-webkit-backdrop-filter: blur(50px) saturate(1.5);
+	background: var(--bg70);
+	border: 1px solid var(--glass-border-col);
+	border-radius: 16px;
+	box-shadow: var(--shadow-lg);
+	padding: 16px;
+	color: var(--col-txt1);
+	font-family: inherit;
+}
+
+#datebox.show {
+	display: block;
+	animation: dateboxIn 200ms var(--ease-decel);
+}
+
+@keyframes dateboxIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+#datebox .datebox-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+#datebox .datebox-header h3 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+#datebox .datebox-header .datebox-nav {
+	display: flex;
+	gap: 4px;
+}
+
+#datebox .datebox-header .datebox-nav span {
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 6px;
+	font-size: 18px;
+	user-select: none;
+	transition: background 100ms;
+}
+
+#datebox .datebox-header .datebox-nav span:hover {
+	background: var(--hover-b);
+}
+
+#datebox .datebox-weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+	text-align: center;
+	font-size: 11px;
+	color: var(--col-txt2, #888);
+	margin-bottom: 4px;
+	user-select: none;
+}
+
+#datebox .datebox-days {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+#datebox .datebox-day {
+	aspect-ratio: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-size: 13px;
+	cursor: default;
+	transition: background 100ms;
+	user-select: none;
+}
+
+#datebox .datebox-day.other-month {
+	opacity: 0.35;
+}
+
+#datebox .datebox-day.today {
+	background: linear-gradient(130deg, var(--theme-1), var(--theme-2));
+	color: #fff;
+	font-weight: 600;
+}
+
+#datebox .datebox-day:not(.today):hover {
+	background: var(--hover-b);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Quick Settings / Control Center
+   ══════════════════════════════════════════════ */
+#quick-settings {
+	position: fixed;
+	right: 10px;
+	bottom: 60px;
+	width: 320px;
+	z-index: 91;
+	display: none;
+	backdrop-filter: blur(50px) saturate(1.5);
+	-webkit-backdrop-filter: blur(50px) saturate(1.5);
+	background: var(--bg70);
+	border: 1px solid var(--glass-border-col);
+	border-radius: 16px;
+	box-shadow: var(--shadow-lg);
+	padding: 16px;
+	color: var(--col-txt1);
+	font-family: inherit;
+}
+
+#quick-settings.show {
+	display: block;
+	animation: dateboxIn 200ms var(--ease-decel);
+}
+
+#quick-settings .qs-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+#quick-settings .qs-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 12px 8px;
+	border-radius: 10px;
+	background: var(--hover-half);
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: background 100ms var(--ease-decel),
+	            border-color 100ms;
+	user-select: none;
+}
+
+#quick-settings .qs-btn:hover {
+	background: var(--hover-b);
+}
+
+#quick-settings .qs-btn.active {
+	background: linear-gradient(130deg, var(--theme-1), var(--theme-2));
+	color: #fff;
+	border-color: transparent;
+}
+
+#quick-settings .qs-btn .material-symbols-rounded {
+	font-size: 20px;
+}
+
+#quick-settings .qs-btn span:last-child {
+	font-size: 11px;
+}
+
+#quick-settings .qs-slider {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+#quick-settings .qs-slider .material-symbols-rounded {
+	font-size: 18px;
+	opacity: 0.7;
+}
+
+#quick-settings .qs-slider input[type="range"] {
+	flex: 1;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 4px;
+	background: var(--hover-b);
+	border-radius: 4px;
+	outline: none;
+}
+
+#quick-settings .qs-slider input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: linear-gradient(130deg, var(--theme-1), var(--theme-2));
+	cursor: pointer;
+	border: 2px solid #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Modal / Notice Dialog
+   ══════════════════════════════════════════════ */
+dialog.realmodal {
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	background: var(--bg70) !important;
+	border: 1px solid var(--glass-border-col);
+	border-radius: 14px;
+	box-shadow: var(--shadow-lg);
+}
+
+dialog.realmodal[open] {
+	animation: modalIn 200ms var(--ease-decel);
+}
+
+@keyframes modalIn {
+	from {
+		opacity: 0;
+		transform: scale(0.92);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+dialog.realmodal::backdrop {
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
 }

@@ -2269,3 +2269,116 @@ function setTitle(windowID, title) {
 		console.warn("Title element not found in the DOM.");
 	}
 }
+
+/* ══════════════════════════════════════════════
+   Win12-Style Calendar / Date Popup
+   ══════════════════════════════════════════════ */
+let dateboxViewDate = new Date();
+
+function toggleDatebox() {
+	const datebox = document.getElementById('datebox');
+	const qs = document.getElementById('quick-settings');
+	if (qs) qs.classList.remove('show');
+	if (datebox.classList.contains('show')) {
+		datebox.classList.remove('show');
+		setTimeout(() => { datebox.style.display = 'none'; }, 200);
+	} else {
+		dateboxViewDate = new Date();
+		renderDatebox();
+		datebox.style.display = 'block';
+		requestAnimationFrame(() => datebox.classList.add('show'));
+	}
+}
+
+function dateboxNav(dir) {
+	dateboxViewDate.setMonth(dateboxViewDate.getMonth() + dir);
+	renderDatebox();
+}
+
+function renderDatebox() {
+	const now = new Date();
+	const year = dateboxViewDate.getFullYear();
+	const month = dateboxViewDate.getMonth();
+	const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December'];
+
+	document.getElementById('datebox-month-label').textContent = monthNames[month] + ' ' + year;
+
+	const daysContainer = document.getElementById('datebox-days');
+	daysContainer.innerHTML = '';
+
+	const firstDay = new Date(year, month, 1).getDay();
+	const daysInMonth = new Date(year, month + 1, 0).getDate();
+	const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+	// Previous month trailing days
+	for (let i = firstDay - 1; i >= 0; i--) {
+		const d = document.createElement('div');
+		d.className = 'datebox-day other-month';
+		d.textContent = daysInPrevMonth - i;
+		daysContainer.appendChild(d);
+	}
+
+	// Current month days
+	for (let i = 1; i <= daysInMonth; i++) {
+		const d = document.createElement('div');
+		d.className = 'datebox-day';
+		if (i === now.getDate() && month === now.getMonth() && year === now.getFullYear()) {
+			d.classList.add('today');
+		}
+		d.textContent = i;
+		daysContainer.appendChild(d);
+	}
+
+	// Next month leading days
+	const totalCells = firstDay + daysInMonth;
+	const remaining = (7 - (totalCells % 7)) % 7;
+	for (let i = 1; i <= remaining; i++) {
+		const d = document.createElement('div');
+		d.className = 'datebox-day other-month';
+		d.textContent = i;
+		daysContainer.appendChild(d);
+	}
+}
+
+/* ══════════════════════════════════════════════
+   Win12-Style Quick Settings / Control Center
+   ══════════════════════════════════════════════ */
+function toggleQuickSettings() {
+	const qs = document.getElementById('quick-settings');
+	const datebox = document.getElementById('datebox');
+	if (datebox) datebox.classList.remove('show');
+	if (qs.classList.contains('show')) {
+		qs.classList.remove('show');
+		setTimeout(() => { qs.style.display = 'none'; }, 200);
+	} else {
+		qs.style.display = 'block';
+		requestAnimationFrame(() => qs.classList.add('show'));
+	}
+}
+
+function toggleQS(el) {
+	el.classList.toggle('active');
+}
+
+function setBrightness(val) {
+	document.getElementById('workspace').style.filter = 'brightness(' + (val / 100) + ')';
+}
+
+// Close datebox/quick-settings when clicking outside
+document.addEventListener('click', function(e) {
+	const datebox = document.getElementById('datebox');
+	const qs = document.getElementById('quick-settings');
+	if (datebox && datebox.classList.contains('show')) {
+		if (!datebox.contains(e.target) && !e.target.closest('#draggable-time') && !e.target.closest('[onclick*="toggleDatebox"]')) {
+			datebox.classList.remove('show');
+			setTimeout(() => { datebox.style.display = 'none'; }, 200);
+		}
+	}
+	if (qs && qs.classList.contains('show')) {
+		if (!qs.contains(e.target) && !e.target.closest('#batterydisdiv') && !e.target.closest('[onclick*="toggleQuickSettings"]')) {
+			qs.classList.remove('show');
+			setTimeout(() => { qs.style.display = 'none'; }, 200);
+		}
+	}
+});

@@ -193,14 +193,14 @@
 								dark_mode
 							</span>
 						</div>
-						<div id="batterydisdiv" class="navmalobj">
+						<div id="batterydisdiv" class="navmalobj" onclick="toggleQuickSettings()" style="cursor:pointer">
 							<span id="battery-p-display">
 							</span>
 							<span id="battery-display" class="material-symbols-rounded">
 								p ic
 							</span>
 						</div>
-						<div class="navmalobj">
+						<div class="navmalobj" onclick="toggleDatebox()" style="cursor:pointer">
 							<hitbx class="hitbox" title="time" id="draggable-time" draggable="true">
 								<span id="time-display">...</span>
 								<span id="date-display"></span>
@@ -459,6 +459,59 @@
 		<h2>Notifications</h2>
 		<ul id="nc-list" class="nc-list"></ul>
 		<p id="nc-empty" class="nc-empty">No notifications</p>
+	</div>
+
+	<!-- Calendar / Date popup (Win12-style) -->
+	<div id="datebox">
+		<div class="datebox-header">
+			<h3 id="datebox-month-label"></h3>
+			<div class="datebox-nav">
+				<span class="material-symbols-rounded" onclick="dateboxNav(-1)">chevron_left</span>
+				<span class="material-symbols-rounded" onclick="dateboxNav(1)">chevron_right</span>
+			</div>
+		</div>
+		<div class="datebox-weekdays">
+			<span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+		</div>
+		<div class="datebox-days" id="datebox-days"></div>
+	</div>
+
+	<!-- Quick Settings / Control Center (Win12-style) -->
+	<div id="quick-settings">
+		<div class="qs-grid">
+			<div class="qs-btn active" onclick="toggleQS(this,'wifi')" data-qs="wifi">
+				<span class="material-symbols-rounded">wifi</span>
+				<span>Wi-Fi</span>
+			</div>
+			<div class="qs-btn" onclick="toggleQS(this,'bluetooth')" data-qs="bluetooth">
+				<span class="material-symbols-rounded">bluetooth</span>
+				<span>Bluetooth</span>
+			</div>
+			<div class="qs-btn" onclick="toggleQS(this,'airplane')" data-qs="airplane">
+				<span class="material-symbols-rounded">flight</span>
+				<span>Airplane</span>
+			</div>
+			<div class="qs-btn active" onclick="toggleQS(this,'sound')" data-qs="sound">
+				<span class="material-symbols-rounded">volume_up</span>
+				<span>Sound</span>
+			</div>
+			<div class="qs-btn" onclick="toggleQS(this,'nightlight')" data-qs="nightlight">
+				<span class="material-symbols-rounded">nightlight</span>
+				<span>Night Light</span>
+			</div>
+			<div class="qs-btn" onclick="toggleTheme()" data-qs="darkmode">
+				<span class="material-symbols-rounded">dark_mode</span>
+				<span>Dark Mode</span>
+			</div>
+		</div>
+		<div class="qs-slider">
+			<span class="material-symbols-rounded">brightness_6</span>
+			<input type="range" min="40" max="100" value="100" oninput="setBrightness(this.value)">
+		</div>
+		<div class="qs-slider">
+			<span class="material-symbols-rounded">volume_up</span>
+			<input type="range" min="0" max="100" value="80">
+		</div>
 	</div>
 
 	<!-- Show Desktop button (appended to taskbar by os-features.js) -->
