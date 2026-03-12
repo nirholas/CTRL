@@ -1,6 +1,7 @@
 var dragging = false, remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize), navheight;
 
 var ctrldotcsscache, transactionLib = [], notificationContext = {};
+var materialSymbolsFontBlobUrl = null;
 
 async function openlaunchprotocol(appid, data, id, winuid) {
     sysLog("OLP", `Opening "${data}" in "${appid}" for ${winuid || id || 'operation'}`);
@@ -301,27 +302,27 @@ async function prepareIframeContent(cont, appid, winuid) {
         styleBlock += `<style>${updatedCss}</style>`;
     }
 
-    async function cacheFont(url, cacheKey, maxAttempts = 2, delayMs = 2000) {
-        const cache = await caches.open('font-cache');
-        let response = await cache.match(url);
-        if (!response) {
-            for (let i = 0; i < maxAttempts; i++) {
+    if (getMetaTagContent(contentString, 'ctrl-include')?.includes('material-symbols-rounded')) {
+        if (!materialSymbolsFontBlobUrl) {
+            try {
+                const localRes = await fetch('libs/MaterialSymbolsRounded.woff2');
+                if (localRes.ok) {
+                    const blob = await localRes.blob();
+                    materialSymbolsFontBlobUrl = URL.createObjectURL(blob);
+                }
+            } catch (_) { }
+            if (!materialSymbolsFontBlobUrl) {
                 try {
-                    response = await fetch(url, { cache: 'reload' });
-                    if (response.ok) {
-                        await cache.put(url, response.clone());
-                        break;
+                    const remoteRes = await fetch('https://ctrl.surf/libs/MaterialSymbolsRounded.woff2');
+                    if (remoteRes.ok) {
+                        const blob = await remoteRes.blob();
+                        materialSymbolsFontBlobUrl = URL.createObjectURL(blob);
                     }
                 } catch (_) { }
-                await new Promise(r => setTimeout(r, delayMs));
             }
         }
-    }
-
-    if (getMetaTagContent(contentString, 'ctrl-include')?.includes('material-symbols-rounded')) {
-        const fontUrl = 'https://ctrl.surf/libs/MaterialSymbolsRounded.woff2';
-        cacheFont(fontUrl, 'material-symbols-rounded');
-        styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontUrl}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
+        const fontSrc = materialSymbolsFontBlobUrl || 'https://ctrl.surf/libs/MaterialSymbolsRounded.woff2';
+        styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontSrc}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
     }
 
     const ctxScript = getMetaTagContent(contentString, 'ctrl-include')?.includes('contextMenu') ? await fetch('scripts/ctxmenu.js').then(res => res.text()) : '';
