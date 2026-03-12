@@ -1,6 +1,5 @@
 
-<br>
-<h1>About</h1>
+
 CTRL is a web system designed for any modern device with a browser. CTRL apps can perform complex tasks more easily than native apps by simulating an abstract virtual system within the browser. 
 
 CTRL is a collection of features, including apps, themes, permission systems, and styling standards. CTRL acts as a filesystem access layer and gives exactly what the apps need, no more-no less.
