@@ -11,7 +11,7 @@ CTRL is a collection of features, including apps, themes, permission systems, an
 - A suite of default applications to ease your work. There's also a store where you can install even more applications!
 - CTRL is designed for the user. The system focuses on giving a stable environment that a user needs. Maintaining simplicity and efficiency in UI. No flashy effects or extensive animations.
 ## Run it.
-[https://ctrl.surf/](https://ctrl.surf/).
+[https://x/](https://x/).
 > If you are on mobiles, CTRL Mobile Mode works well as a PWA. Learn How To Install [here](https://ctrl.gitbook.io/main/get-started/access-ctrl#installing-ctrl-as-an-app-in-chrome).
 
 # Resources
