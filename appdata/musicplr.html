@@ -1210,12 +1210,12 @@
 		}
 
 		async function vizchange() {
-			let fetched = await fetch("https://ctrl.surf/plr/visualizerDB.json");
+			let fetched = await fetch("https://ctrl.best/plr/visualizerDB.json");
 			let items = await fetched.json();
 			items.push("Custom URL");
 			const url = await window.parent.showDropdownModal("Choose a visualizer", "Click on custom URL to use a custom visualizer.", items);
 			if (url != "Custom URL") {
-				loadVisualizerFromURL(`https://ctrl.surf/plr/visualizers/${url}.js`);
+				loadVisualizerFromURL(`https://ctrl.best/plr/visualizers/${url}.js`);
 			} else {
 				const customUrl = await window.parent.ask("Custom Visualizer URL");
 				if (customUrl) {

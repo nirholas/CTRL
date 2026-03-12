@@ -313,7 +313,7 @@ async function prepareIframeContent(cont, appid, winuid) {
             } catch (_) { }
             if (!materialSymbolsFontBlobUrl) {
                 try {
-                    const remoteRes = await fetch('https://ctrl.surf/libs/MaterialSymbolsRounded.woff2');
+                    const remoteRes = await fetch('https://ctrl.best/libs/MaterialSymbolsRounded.woff2');
                     if (remoteRes.ok) {
                         const blob = await remoteRes.blob();
                         materialSymbolsFontBlobUrl = URL.createObjectURL(blob);
@@ -321,7 +321,7 @@ async function prepareIframeContent(cont, appid, winuid) {
                 } catch (_) { }
             }
         }
-        const fontSrc = materialSymbolsFontBlobUrl || 'https://ctrl.surf/libs/MaterialSymbolsRounded.woff2';
+        const fontSrc = materialSymbolsFontBlobUrl || 'https://ctrl.best/libs/MaterialSymbolsRounded.woff2';
         styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontSrc}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
     }
 

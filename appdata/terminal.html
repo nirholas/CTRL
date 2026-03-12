@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Terminal</title>
+	<meta name="permissions" content="unsandboxed, utility, fileGet, fileSet, dir, olp, settings, system">
+	<meta name="capabilities" content="terminal,.sh,.osl">
+	<meta name="CTRL-include" content="CTRL.css">
+	<meta name="CTRL-icon" content="<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48' fill='none'><rect width='48' height='48' rx='8' fill='#1a1a2e'/><path d='M12 14l8 8-8 8' stroke='#6179ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><line x1='22' y1='30' x2='36' y2='30' stroke='#6179ff' stroke-width='2.5' stroke-linecap='round'/></svg>">
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		html, body { width: 100%; height: 100%; overflow: hidden; background: var(--col-bg1, #0d1117); color: #e0e0e0; font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-size: 13px; }
+		#terminal { display: flex; flex-direction: column; height: 100%; }
+		#output { flex: 1; overflow-y: auto; padding: 12px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; user-select: text; -webkit-user-select: text; }
+		#output::-webkit-scrollbar { width: 6px; }
+		#output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+		#input-line { display: flex; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.06); }
+		#prompt { color: #3ddc54; font-weight: bold; margin-right: 8px; white-space: nowrap; }
+		#input { flex: 1; background: transparent; border: none; outline: none; color: #e0e0e0; font-family: inherit; font-size: inherit; caret-color: #3ddc54; }
+		@keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+		#cursor-blink { display: inline-block; width: 8px; height: 15px; background: #3ddc54; animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 1px; pointer-events: none; }
+		.cmd-line { color: #93a8ff; }
+		.error-line { color: #fc615d; }
+		.success-line { color: #3ddc54; }
+		.info-line { color: #8b949e; }
+		.dir-item { color: #6179ff; font-weight: bold; }
+		.file-item { color: #e0e0e0; }
+		.exec-item { color: #3ddc54; font-weight: bold; }
+		.header-line { color: #a855f7; font-weight: bold; }
+		.accent-line { color: #6179ff; }
+		.tab-suggest { color: #555; font-style: italic; }
+		::selection { background: rgba(97,121,255,0.3); color: #fff; }
+	</style>
+</head>
+<body>
+	<div id="terminal">
+		<div id="output"></div>
+		<div id="input-line">
+			<span id="prompt">user@CTRL:~$</span>
+			<input id="input" type="text" spellcheck="false" autocomplete="off" autofocus>
+			<span id="cursor-blink"></span>
+		</div>
+	</div>
+	<script>
+		const output = document.getElementById('output');
+		const input = document.getElementById('input');
+		const promptEl = document.getElementById('prompt');
+		const cursorBlink = document.getElementById('cursor-blink');
+		const bootTime = Date.now();
+		let cwd = '';
+		let cmdHistory = [];
+		let historyIndex = -1;
+		let env = { SHELL: '/bin/CTRL-terminal', TERM: 'CTRL-256color', HOME: '~', PATH: '/usr/local/bin:/usr/bin:/bin' };
+		let aliases = {};
+		let pendingConfirm = null;
+		let ntxSession;
+
+		input.addEventListener('focus', () => { cursorBlink.style.display = 'none'; });
+		input.addEventListener('blur', () => { cursorBlink.style.display = 'inline-block'; });
+
+		// ── NTX greenflag initialization ──
+
+		async function greenflag() {
+			ntxSession = new NTXSession();
+			updatePrompt();
+			print('CTRL Terminal v2.0', 'header-line');
+			print('Type "help" for available commands, "neofetch" for system info.', 'info-line');
+			print('');
+			input.focus();
+		}
+
+		// ── Helpers ──
+
+		function print(text, cls) {
+			const span = document.createElement('span');
+			span.className = cls || '';
+			span.textContent = text;
+			output.appendChild(span);
+			output.appendChild(document.createTextNode('\n'));
+			output.scrollTop = output.scrollHeight;
+		}
+
+		function printHTML(html) {
+			const div = document.createElement('div');
+			div.innerHTML = html;
+			output.appendChild(div);
+			output.scrollTop = output.scrollHeight;
+		}
+
+		function updatePrompt() {
+			const user = window.parent.CurrentUsername || 'user';
+			const display = cwd ? '~/' + cwd : '~';
+			promptEl.textContent = user + '@CTRL:' + display + '$ ';
+		}
+
+		function getMemoryAtPath(path) {
+			if (!window.parent.memory) return null;
+			const root = window.parent.memory.root;
+			if (!path || path === '') return root;
+			const parts = path.replace(/\/$/, '').split('/');
+			let current = root;
+			for (const part of parts) {
+				const key = part + '/';
+				if (current[key]) {
+					current = current[key];
+				} else if (current[part]) {
+					return current[part];
+				} else {
+					return null;
+				}
+			}
+			return current;
+		}
+
+		function resolvePath(path) {
+			if (!path) return cwd;
+			if (path === '/') return '';
+			if (path === '~') return '';
+			if (path.startsWith('~/')) path = path.slice(2);
+			else if (path.startsWith('/')) path = path.slice(1);
+			else if (cwd) path = cwd + '/' + path;
+			const parts = path.split('/').filter(Boolean);
+			const resolved = [];
+			for (const p of parts) {
+				if (p === '..') resolved.pop();
+				else if (p !== '.') resolved.push(p);
+			}
+			return resolved.join('/');
+		}
+
+		function splitParentAndName(path) {
+			const parts = path.split('/');
+			const name = parts.pop();
+			return { dirPath: parts.join('/'), name };
+		}
+
+		function getFileEntry(path) {
+			const { dirPath, name } = splitParentAndName(path);
+			const dir = getMemoryAtPath(dirPath);
+			if (!dir) return null;
+			if (dir[name] && dir[name].id) return { entry: dir[name], dir, dirPath, name };
+			return null;
+		}
+
+		async function readFileContent(id) {
+			const file = await window.parent.getFileById(id);
+			let content = file.content;
+			if (typeof window.parent.decodeBase64Content === 'function') {
+				try { content = window.parent.decodeBase64Content(content); } catch(e) {}
+			}
+			return content;
+		}
+
+		function getEntriesAtPath(path) {
+			const dir = getMemoryAtPath(path);
+			if (!dir || typeof dir !== 'object' || dir.id) return null;
+			return Object.keys(dir).filter(k => k !== '_id');
+		}
+
+		function matchGlob(name, pattern) {
+			const regex = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
+			return new RegExp('^' + regex + '$', 'i').test(name);
+		}
+
+		function isExecutable(name) {
+			return name.endsWith('.app') || name.endsWith('.osl') || name.endsWith('.sh');
+		}
+
+		// ── Command Parser ──
+
+		function parseCommandLine(line) {
+			const chains = [];
+			let current = '';
+			let inSingle = false, inDouble = false;
+			for (let i = 0; i < line.length; i++) {
+				const ch = line[i];
+				if (ch === "'" && !inDouble) { inSingle = !inSingle; current += ch; continue; }
+				if (ch === '"' && !inSingle) { inDouble = !inDouble; current += ch; continue; }
+				if (!inSingle && !inDouble && ch === '&' && line[i+1] === '&') {
+					chains.push(current.trim());
+					current = '';
+					i++;
+					continue;
+				}
+				current += ch;
+			}
+			if (current.trim()) chains.push(current.trim());
+			return chains;
+		}
+
+		function parsePipes(segment) {
+			const pipes = [];
+			let current = '';
+			let inSingle = false, inDouble = false;
+			for (let i = 0; i < segment.length; i++) {
+				const ch = segment[i];
+				if (ch === "'" && !inDouble) { inSingle = !inSingle; current += ch; continue; }
+				if (ch === '"' && !inSingle) { inDouble = !inDouble; current += ch; continue; }
+				if (!inSingle && !inDouble && ch === '|') {
+					pipes.push(current.trim());
+					current = '';
+					continue;
+				}
+				current += ch;
+			}
+			if (current.trim()) pipes.push(current.trim());
+			return pipes;
+		}
+
+		function parseRedirect(segment) {
+			let outFile = null;
+			let appendMode = false;
+			let inSingle = false, inDouble = false;
+			let redirectIdx = -1;
+			for (let i = 0; i < segment.length; i++) {
+				const ch = segment[i];
+				if (ch === "'" && !inDouble) { inSingle = !inSingle; continue; }
+				if (ch === '"' && !inSingle) { inDouble = !inDouble; continue; }
+				if (!inSingle && !inDouble && ch === '>') {
+					redirectIdx = i;
+					if (segment[i+1] === '>') {
+						appendMode = true;
+						i++;
+					}
+					break;
+				}
+			}
+			if (redirectIdx !== -1) {
+				outFile = segment.slice(redirectIdx + (appendMode ? 2 : 1)).trim();
+				segment = segment.slice(0, redirectIdx).trim();
+				if ((outFile.startsWith('"') && outFile.endsWith('"')) || (outFile.startsWith("'") && outFile.endsWith("'"))) {
+					outFile = outFile.slice(1, -1);
+				}
+			}
+			return { segment, outFile, appendMode };
+		}
+
+		function tokenize(segment) {
+			const tokens = [];
+			let current = '';
+			let inSingle = false, inDouble = false;
+			for (let i = 0; i < segment.length; i++) {
+				const ch = segment[i];
+				if (ch === "'" && !inDouble) { inSingle = !inSingle; continue; }
+				if (ch === '"' && !inSingle) { inDouble = !inDouble; continue; }
+				if (!inSingle && !inDouble && /\s/.test(ch)) {
+					if (current) { tokens.push(current); current = ''; }
+					continue;
+				}
+				current += ch;
+			}
+			if (current) tokens.push(current);
+			return tokens;
+		}
+
+		// ── Commands ──
+
+		const commands = {
+			help(args, stdin) {
+				const cmds = [
+					['help',                'Show this help message'],
+					['clear',               'Clear the terminal screen'],
+					['ls [path]',           'List directory contents'],
+					['cd <path>',           'Change directory'],
+					['pwd',                 'Print working directory'],
+					['cat <file>',          'Display file contents'],
+					['mkdir <name>',        'Create a directory'],
+					['rmdir <dir>',         'Remove an empty directory'],
+					['touch <name>',        'Create an empty file'],
+					['rm [-f|-r] <file>',   'Delete a file or directory'],
+					['mv <src> <dest>',     'Move or rename a file'],
+					['cp <src> <dest>',     'Copy a file'],
+					['open <file>',         'Open file with default handler'],
+					['echo <text>',         'Print text (use > or >> for files)'],
+					['grep <pat> <file>',   'Search file contents with regex'],
+					['wc <file>',           'Count lines, words, and characters'],
+					['head [-n N] <file>',  'Show first N lines (default 10)'],
+					['tail [-n N] <file>',  'Show last N lines (default 10)'],
+					['find <path> -name <p>','Find files matching glob pattern'],
+					['alias <n>=<cmd>',     'Create a command alias'],
+					['whoami',              'Display current username'],
+					['date',                'Display current date and time'],
+					['uptime',              'Show session uptime'],
+					['uname [-a]',          'Display system info'],
+					['neofetch',            'System info with ASCII art'],
+					['ps',                  'List running processes (windows)'],
+					['kill <pid>',          'Close a window by ID'],
+					['history',             'Show command history'],
+					['export K=V',          'Set environment variable'],
+					['env',                 'List environment variables'],
+					['storage',             'Show storage usage summary'],
+					['install <appId>',     'Install an app from the store'],
+					['theme <name>',        'Switch theme (dark/light)'],
+					['reboot',              'Restart CTRL'],
+					['logout',              'Log out of current session'],
+					['exit',                'Close the terminal'],
+				];
+				print('CTRL Terminal v2.0 — Available Commands:', 'header-line');
+				print('', '');
+				for (const [cmd, desc] of cmds) {
+					print('  ' + cmd.padEnd(22) + desc, 'info-line');
+				}
+				print('', '');
+				print('Operators: && (chain)  | (pipe)  > (redirect)  >> (append)  "quotes"', 'info-line');
+				return cmds.map(([c, d]) => c.padEnd(22) + d).join('\n');
+			},
+
+			clear() {
+				output.textContent = '';
+				return '';
+			},
+
+			async ls(args, stdin) {
+				const path = resolvePath(args[0]);
+				const entries = getEntriesAtPath(path);
+				if (!entries) {
+					print('ls: cannot access \'' + (args[0] || path || '/') + '\': No such directory', 'error-line');
+					return '';
+				}
+				if (entries.length === 0) {
+					print('(empty directory)', 'info-line');
+					return '';
+				}
+				const sorted = entries.sort((a, b) => {
+					const aDir = a.endsWith('/'), bDir = b.endsWith('/');
+					if (aDir && !bDir) return -1;
+					if (!aDir && bDir) return 1;
+					return a.localeCompare(b);
+				});
+				const lines = [];
+				for (const entry of sorted) {
+					if (entry.endsWith('/')) {
+						print('  ' + entry, 'dir-item');
+					} else if (isExecutable(entry)) {
+						print('  ' + entry + '*', 'exec-item');
+					} else {
+						print('  ' + entry, 'file-item');
+					}
+					lines.push(entry);
+				}
+				return lines.join('\n');
+			},
+
+			cd(args) {
+				if (!args[0] || args[0] === '~' || args[0] === '/') {
+					cwd = '';
+					updatePrompt();
+					return '';
+				}
+				const newPath = resolvePath(args[0]);
+				const dir = getMemoryAtPath(newPath);
+				if (!dir || typeof dir !== 'object' || dir.id) {
+					print('cd: no such directory: ' + args[0], 'error-line');
+					return '';
+				}
+				cwd = newPath;
+				updatePrompt();
+				return '';
+			},
+
+			pwd() {
+				const p = '/' + (cwd || '');
+				print(p);
+				return p;
+			},
+
+			async cat(args, stdin) {
+				if (!args[0]) { print('cat: missing operand', 'error-line'); return ''; }
+				const path = resolvePath(args[0]);
+				const fe = getFileEntry(path);
+				if (!fe) { print('cat: ' + args[0] + ': No such file', 'error-line'); return ''; }
+				try {
+					const content = await readFileContent(fe.entry.id);
+					if (content.length > 50000) {
+						print(content.slice(0, 50000), '');
+						print('... (truncated, ' + content.length + ' chars total)', 'info-line');
+					} else {
+						print(content, '');
+					}
+					return content;
+				} catch(e) {
+					print('cat: error reading file: ' + e.message, 'error-line');
+					return '';
+				}
+			},
+
+			async mkdir(args) {
+				if (!args[0]) { print('mkdir: missing operand', 'error-line'); return ''; }
+				try {
+					const path = cwd ? cwd + '/' : '';
+					await window.parent.createFolder(path + args[0] + '/');
+					print('Created directory: ' + args[0], 'success-line');
+				} catch(e) {
+					print('mkdir: error: ' + e.message, 'error-line');
+				}
+				return '';
+			},
+
+			async rmdir(args) {
+				if (!args[0]) { print('rmdir: missing operand', 'error-line'); return ''; }
+				const path = resolvePath(args[0]);
+				const dir = getMemoryAtPath(path);
+				if (!dir || typeof dir !== 'object' || dir.id) {
+					print('rmdir: failed to remove \'' + args[0] + '\': No such directory', 'error-line');
+					return '';
+				}
+				const entries = Object.keys(dir).filter(k => k !== '_id');
+				if (entries.length > 0) {
+					print('rmdir: failed to remove \'' + args[0] + '\': Directory not empty', 'error-line');
+					return '';
+				}
+				try {
+					await window.parent.remfolder(path + '/');
+					print('Removed directory: ' + args[0], 'success-line');
+				} catch(e) {
+					print('rmdir: error: ' + e.message, 'error-line');
+				}
+				return '';
+			},
+
+			async touch(args) {
+				if (!args[0]) { print('touch: missing operand', 'error-line'); return ''; }
+				try {
+					const folder = (cwd ? cwd + '/' : '');
+					const name = args[0].includes('.') ? args[0].split('.').slice(0, -1).join('.') : args[0];
+					const ext = args[0].includes('.') ? args[0].split('.').pop() : 'txt';
+					await window.parent.createFile(folder, name, ext, '');
+					print('Created file: ' + args[0], 'success-line');
+				} catch(e) {
+					print('touch: error: ' + e.message, 'error-line');
+				}
+				return '';
+			},
+
+			async rm(args) {
+				if (!args[0]) { print('rm: missing operand', 'error-line'); return ''; }
+				const flags = args.filter(a => a.startsWith('-'));
+				const targets = args.filter(a => !a.startsWith('-'));
+				const force = flags.some(f => f.includes('f'));
+				const recursive = flags.some(f => f.includes('r'));
+				const target = targets[0];
+				if (!target) { print('rm: missing operand', 'error-line'); return ''; }
+
+				const path = resolvePath(target);
+
+				// Check if it's a directory
+				const dir = getMemoryAtPath(path);
+				if (dir && typeof dir === 'object' && !dir.id) {
+					if (!recursive) {
+						print('rm: cannot remove \'' + target + '\': Is a directory (use -r)', 'error-line');
+						return '';
+					}
+					async function removeRecursive(obj, basePath) {
+						for (const key of Object.keys(obj)) {
+							if (key === '_id') continue;
+							if (key.endsWith('/')) {
+								if (typeof obj[key] === 'object') {
+									await removeRecursive(obj[key], basePath + key);
+								}
+							} else if (obj[key] && obj[key].id) {
+								await window.parent.remfile(obj[key].id);
+							}
+						}
+						await window.parent.remfolder(basePath);
+					}
+					if (!force) {
+						print('rm: recursively remove \'' + target + '\'? (y/n)', 'info-line');
+						pendingConfirm = async (answer) => {
+							if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+								try {
+									await removeRecursive(dir, path + '/');
+									print('Removed: ' + target, 'success-line');
+								} catch(e) { print('rm: error: ' + e.message, 'error-line'); }
+							} else { print('rm: cancelled', 'info-line'); }
+						};
+						return '';
+					}
+					try {
+						await removeRecursive(dir, path + '/');
+						print('Removed: ' + target, 'success-line');
+					} catch(e) { print('rm: error: ' + e.message, 'error-line'); }
+					return '';
+				}
+
+				// File removal
+				const fe = getFileEntry(path);
+				if (!fe) {
+					print('rm: cannot remove \'' + target + '\': No such file or directory', 'error-line');
+					return '';
+				}
+				if (!force) {
+					print('rm: remove \'' + target + '\'? (y/n)', 'info-line');
+					pendingConfirm = async (answer) => {
+						if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+							try {
+								await window.parent.remfile(fe.entry.id);
+								print('Removed: ' + target, 'success-line');
+							} catch(e) { print('rm: error: ' + e.message, 'error-line'); }
+						} else { print('rm: cancelled', 'info-line'); }
+					};
+					return '';
+				}
+				try {
+					await window.parent.remfile(fe.entry.id);
+					print('Removed: ' + target, 'success-line');
+				} catch(e) { print('rm: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			async mv(args) {
+				if (args.length < 2) { print('mv: missing destination', 'error-line'); return ''; }
+				const srcPath = resolvePath(args[0]);
+				const destPath = resolvePath(args[1]);
+				const fe = getFileEntry(srcPath);
+				if (!fe) { print('mv: cannot stat \'' + args[0] + '\': No such file', 'error-line'); return ''; }
+				try {
+					const destDir = getMemoryAtPath(destPath);
+					if (destDir && typeof destDir === 'object' && !destDir.id) {
+						await window.parent.moveFileToFolder(fe.entry.id, destPath + '/');
+					} else {
+						const { dirPath: destParent, name: newName } = splitParentAndName(destPath);
+						const folder = destParent ? destParent + '/' : (cwd ? cwd + '/' : '');
+						const content = await readFileContent(fe.entry.id);
+						const ext = newName.includes('.') ? newName.split('.').pop() : '';
+						const baseName = newName.includes('.') ? newName.split('.').slice(0, -1).join('.') : newName;
+						await window.parent.remfile(fe.entry.id);
+						await window.parent.createFile(folder, baseName, ext, content);
+					}
+					print('Moved: ' + args[0] + ' \u2192 ' + args[1], 'success-line');
+				} catch(e) { print('mv: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			async cp(args) {
+				if (args.length < 2) { print('cp: missing destination', 'error-line'); return ''; }
+				const srcPath = resolvePath(args[0]);
+				const fe = getFileEntry(srcPath);
+				if (!fe) { print('cp: cannot stat \'' + args[0] + '\': No such file', 'error-line'); return ''; }
+				try {
+					const content = await readFileContent(fe.entry.id);
+					const destPath = resolvePath(args[1]);
+					const destDir = getMemoryAtPath(destPath);
+					let folder, baseName, ext;
+					if (destDir && typeof destDir === 'object' && !destDir.id) {
+						folder = destPath + '/';
+						const srcName = fe.name;
+						baseName = srcName.includes('.') ? srcName.split('.').slice(0, -1).join('.') : srcName;
+						ext = srcName.includes('.') ? srcName.split('.').pop() : '';
+					} else {
+						const { dirPath: dp, name: nn } = splitParentAndName(destPath);
+						folder = dp ? dp + '/' : (cwd ? cwd + '/' : '');
+						baseName = nn.includes('.') ? nn.split('.').slice(0, -1).join('.') : nn;
+						ext = nn.includes('.') ? nn.split('.').pop() : '';
+					}
+					await window.parent.createFile(folder, baseName, ext, content);
+					print('Copied: ' + args[0] + ' \u2192 ' + args[1], 'success-line');
+				} catch(e) { print('cp: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			async open(args) {
+				if (!args[0]) { print('open: missing operand', 'error-line'); return ''; }
+				const path = resolvePath(args[0]);
+				const fe = getFileEntry(path);
+				if (!fe) {
+					print('open: cannot open \'' + args[0] + '\': No such file', 'error-line');
+					return '';
+				}
+				window.parent.openfile(fe.entry.id);
+				print('Opening: ' + args[0], 'success-line');
+				return '';
+			},
+
+			echo(args, stdin) {
+				const text = args.join(' ');
+				print(text);
+				return text;
+			},
+
+			async grep(args, stdin) {
+				if (args.length < 1) { print('grep: usage: grep <pattern> [file]', 'error-line'); return ''; }
+				const pattern = args[0];
+				let content;
+				if (args[1]) {
+					const path = resolvePath(args[1]);
+					const fe = getFileEntry(path);
+					if (!fe) { print('grep: ' + args[1] + ': No such file', 'error-line'); return ''; }
+					try { content = await readFileContent(fe.entry.id); }
+					catch(e) { print('grep: error reading file: ' + e.message, 'error-line'); return ''; }
+				} else if (stdin) {
+					content = stdin;
+				} else {
+					print('grep: no input provided', 'error-line');
+					return '';
+				}
+				let regex;
+				try { regex = new RegExp(pattern, 'gi'); }
+				catch(e) { print('grep: invalid regex: ' + e.message, 'error-line'); return ''; }
+				const lines = content.split('\n');
+				const matched = lines.filter(l => regex.test(l));
+				if (matched.length === 0) {
+					print('(no matches)', 'info-line');
+					return '';
+				}
+				matched.forEach(l => {
+					const div = document.createElement('span');
+					const safePattern = new RegExp(pattern, 'gi');
+					let lastIdx = 0;
+					let m;
+					while ((m = safePattern.exec(l)) !== null) {
+						if (m.index > lastIdx) div.appendChild(document.createTextNode(l.slice(lastIdx, m.index)));
+						const hl = document.createElement('span');
+						hl.style.color = '#fc615d';
+						hl.style.fontWeight = 'bold';
+						hl.textContent = m[0];
+						div.appendChild(hl);
+						lastIdx = safePattern.lastIndex;
+						if (m[0].length === 0) safePattern.lastIndex++;
+					}
+					if (lastIdx < l.length) div.appendChild(document.createTextNode(l.slice(lastIdx)));
+					output.appendChild(div);
+					output.appendChild(document.createTextNode('\n'));
+					output.scrollTop = output.scrollHeight;
+				});
+				return matched.join('\n');
+			},
+
+			async wc(args, stdin) {
+				let content;
+				if (args[0]) {
+					const path = resolvePath(args[0]);
+					const fe = getFileEntry(path);
+					if (!fe) { print('wc: ' + args[0] + ': No such file', 'error-line'); return ''; }
+					try { content = await readFileContent(fe.entry.id); }
+					catch(e) { print('wc: error reading file: ' + e.message, 'error-line'); return ''; }
+				} else if (stdin) {
+					content = stdin;
+				} else {
+					print('wc: missing operand', 'error-line');
+					return '';
+				}
+				const lines = content.split('\n').length;
+				const words = content.split(/\s+/).filter(Boolean).length;
+				const chars = content.length;
+				const result = '  ' + lines + ' lines  ' + words + ' words  ' + chars + ' chars';
+				print(result + (args[0] ? '  ' + args[0] : ''));
+				return result;
+			},
+
+			async head(args, stdin) {
+				let n = 10;
+				let fileArg = null;
+				for (let i = 0; i < args.length; i++) {
+					if (args[i] === '-n' && args[i+1]) { n = parseInt(args[i+1], 10) || 10; i++; }
+					else if (!args[i].startsWith('-')) { fileArg = args[i]; }
+				}
+				let content;
+				if (fileArg) {
+					const path = resolvePath(fileArg);
+					const fe = getFileEntry(path);
+					if (!fe) { print('head: ' + fileArg + ': No such file', 'error-line'); return ''; }
+					try { content = await readFileContent(fe.entry.id); }
+					catch(e) { print('head: error reading file: ' + e.message, 'error-line'); return ''; }
+				} else if (stdin) {
+					content = stdin;
+				} else {
+					print('head: missing operand', 'error-line');
+					return '';
+				}
+				const lines = content.split('\n').slice(0, n);
+				const result = lines.join('\n');
+				print(result);
+				return result;
+			},
+
+			async tail(args, stdin) {
+				let n = 10;
+				let fileArg = null;
+				for (let i = 0; i < args.length; i++) {
+					if (args[i] === '-n' && args[i+1]) { n = parseInt(args[i+1], 10) || 10; i++; }
+					else if (!args[i].startsWith('-')) { fileArg = args[i]; }
+				}
+				let content;
+				if (fileArg) {
+					const path = resolvePath(fileArg);
+					const fe = getFileEntry(path);
+					if (!fe) { print('tail: ' + fileArg + ': No such file', 'error-line'); return ''; }
+					try { content = await readFileContent(fe.entry.id); }
+					catch(e) { print('tail: error reading file: ' + e.message, 'error-line'); return ''; }
+				} else if (stdin) {
+					content = stdin;
+				} else {
+					print('tail: missing operand', 'error-line');
+					return '';
+				}
+				const allLines = content.split('\n');
+				const lines = allLines.slice(Math.max(0, allLines.length - n));
+				const result = lines.join('\n');
+				print(result);
+				return result;
+			},
+
+			async find(args) {
+				let searchPath = '';
+				let namePattern = null;
+				for (let i = 0; i < args.length; i++) {
+					if (args[i] === '-name' && args[i+1]) { namePattern = args[i+1]; i++; }
+					else if (!args[i].startsWith('-')) {
+						if (!namePattern && i === 0) searchPath = args[i];
+						else if (!namePattern) namePattern = args[i];
+					}
+				}
+				if (!namePattern && args[0] && !args[0].startsWith('-')) {
+					namePattern = args[0];
+					searchPath = '';
+				}
+				if (!namePattern) { print('find: missing search pattern', 'error-line'); return ''; }
+				const resolvedBase = resolvePath(searchPath || '');
+				const results = [];
+				function search(obj, path) {
+					for (const key of Object.keys(obj)) {
+						if (key === '_id') continue;
+						if (key.endsWith('/')) {
+							const dirName = key.slice(0, -1);
+							if (matchGlob(dirName, namePattern)) results.push(path + key);
+							if (typeof obj[key] === 'object') search(obj[key], path + key);
+						} else if (obj[key] && obj[key].id) {
+							if (matchGlob(key, namePattern)) results.push(path + key);
+						}
+					}
+				}
+				const startObj = getMemoryAtPath(resolvedBase);
+				if (!startObj || typeof startObj !== 'object' || startObj.id) {
+					print('find: \'' + (searchPath || '/') + '\': No such directory', 'error-line');
+					return '';
+				}
+				search(startObj, resolvedBase ? resolvedBase + '/' : '');
+				if (results.length === 0) {
+					print('No files matching \'' + namePattern + '\'', 'info-line');
+				} else {
+					for (const r of results) {
+						print('  ./' + r, r.endsWith('/') ? 'dir-item' : 'file-item');
+					}
+				}
+				return results.join('\n');
+			},
+
+			alias(args) {
+				if (!args[0]) {
+					const keys = Object.keys(aliases);
+					if (keys.length === 0) { print('(no aliases defined)', 'info-line'); return ''; }
+					keys.forEach(k => print('alias ' + k + "='" + aliases[k] + "'", 'info-line'));
+					return keys.map(k => k + '=' + aliases[k]).join('\n');
+				}
+				const raw = args.join(' ');
+				const eq = raw.indexOf('=');
+				if (eq === -1) {
+					if (aliases[raw]) { print('alias ' + raw + "='" + aliases[raw] + "'", 'info-line'); }
+					else { print('alias: ' + raw + ': not found', 'error-line'); }
+					return '';
+				}
+				const name = raw.slice(0, eq).trim();
+				let val = raw.slice(eq + 1).trim();
+				if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+					val = val.slice(1, -1);
+				}
+				aliases[name] = val;
+				print('alias ' + name + "='" + val + "'", 'success-line');
+				return '';
+			},
+
+			whoami() {
+				const u = window.parent.CurrentUsername || 'unknown';
+				print(u);
+				return u;
+			},
+
+			date() {
+				const d = new Date().toString();
+				print(d);
+				return d;
+			},
+
+			uname(args) {
+				let info;
+				if (args[0] === '-a') {
+					info = 'CTRL 3.2.1-swarm ' + navigator.platform + ' ' + new Date().toISOString().split('T')[0] + ' CTRL Web Kernel';
+				} else {
+					info = 'CTRL';
+				}
+				print(info);
+				return info;
+			},
+
+			uptime() {
+				const ms = Date.now() - bootTime;
+				const sec = Math.floor(ms / 1000);
+				const min = Math.floor(sec / 60);
+				const hrs = Math.floor(min / 60);
+				const days = Math.floor(hrs / 24);
+				let msg = 'up ';
+				if (days > 0) msg += days + ' day' + (days > 1 ? 's' : '') + ', ';
+				msg += (hrs % 24) + ' hour' + ((hrs % 24) !== 1 ? 's' : '') + ', ';
+				msg += (min % 60) + ' minute' + ((min % 60) !== 1 ? 's' : '') + ', ';
+				msg += (sec % 60) + ' second' + ((sec % 60) !== 1 ? 's' : '');
+				print(msg);
+				return msg;
+			},
+
+			async storage() {
+				try {
+					let totalFiles = 0;
+					let totalDirs = 0;
+					function countItems(obj) {
+						for (const key of Object.keys(obj)) {
+							if (key === '_id') continue;
+							if (key.endsWith('/')) {
+								totalDirs++;
+								if (typeof obj[key] === 'object') countItems(obj[key]);
+							} else if (obj[key] && obj[key].id) {
+								totalFiles++;
+							}
+						}
+					}
+					const root = window.parent.memory ? window.parent.memory.root : null;
+					if (root) countItems(root);
+					print('Storage Usage Summary', 'header-line');
+					print('  Files:       ' + totalFiles, 'info-line');
+					print('  Directories: ' + totalDirs, 'info-line');
+					if (navigator.storage && navigator.storage.estimate) {
+						const est = await navigator.storage.estimate();
+						const usedMB = (est.usage / (1024 * 1024)).toFixed(2);
+						const quotaMB = (est.quota / (1024 * 1024)).toFixed(2);
+						const pct = ((est.usage / est.quota) * 100).toFixed(1);
+						print('  Used:        ' + usedMB + ' MB / ' + quotaMB + ' MB (' + pct + '%)', 'info-line');
+					}
+				} catch(e) { print('storage: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			neofetch() {
+				const user = window.parent.CurrentUsername || 'user';
+				const openWindows = Object.keys(window.parent.winds || {}).length;
+				const ms = Date.now() - bootTime;
+				const min = Math.floor(ms / 60000);
+				const hrs = Math.floor(min / 60);
+				const res = window.screen.width + 'x' + window.screen.height;
+				const pkgCount = (window.parent.defAppsList || []).length;
+
+				const art = [
+					'    ___                    __  ____  _____  ',
+					'   /   | ____ ____  ____  / /_/ __ \\/ ___/ ',
+					'  / /| |/ __ `/ _ \\/ __ \\/ __/ / / /\\__ \\  ',
+					' / ___ / /_/ /  __/ / / / /_/ /_/ /___/ /  ',
+					'/_/  |_\\__, /\\___/_/ /_/\\__/\\____//____/   ',
+					'      /____/                                ',
+					'                                            ',
+				];
+				const info = [
+					user + '@CTRL',
+					'\u2500'.repeat(user.length + 9),
+					'OS: CTRL 3.2.1-swarm',
+					'Host: ' + (location.hostname || 'Browser'),
+					'Kernel: Web Kernel (Service Worker)',
+					'Uptime: ' + (hrs > 0 ? hrs + ' hrs, ' : '') + (min % 60) + ' mins',
+					'Packages: ' + pkgCount + ' (system)',
+					'Shell: CTRL Terminal v2.0',
+					'Resolution: ' + res,
+					'Terminal: CTRL Terminal',
+					'WM: CTRL Window Manager',
+					'Theme: ' + (document.documentElement.classList.contains('dark') ? 'Dark' : 'System'),
+					'Windows: ' + openWindows + ' open',
+					'CPU: ' + navigator.hardwareConcurrency + ' cores',
+				];
+				const result = [];
+				const maxLines = Math.max(art.length, info.length);
+				for (let i = 0; i < maxLines; i++) {
+					const left = art[i] || '                                            ';
+					const right = info[i] || '';
+					const line = left + right;
+					if (i < 6) {
+						print(line, 'accent-line');
+					} else if (i === 6 || (i >= 6 && right.startsWith('\u2500'))) {
+						print(line, 'info-line');
+					} else {
+						print(line, '');
+					}
+					result.push(line);
+				}
+				return result.join('\n');
+			},
+
+			ps() {
+				const wins = window.parent.winds || {};
+				const keys = Object.keys(wins);
+				if (keys.length === 0) {
+					print('No running processes.', 'info-line');
+					return '';
+				}
+				print('  PID                TITLE                STATE', 'header-line');
+				print('  ' + '\u2500'.repeat(55), 'info-line');
+				const lines = [];
+				keys.forEach(key => {
+					const w = wins[key];
+					const title = (w.title || 'untitled').padEnd(20).slice(0, 20);
+					const state = (w.visualState || 'unknown').padEnd(12);
+					const line = '  ' + key.padEnd(20) + ' ' + title + ' ' + state;
+					print(line);
+					lines.push(line);
+				});
+				return lines.join('\n');
+			},
+
+			kill(args) {
+				if (!args[0]) { print('kill: missing PID', 'error-line'); return ''; }
+				const wins = window.parent.winds || {};
+				if (wins[args[0]]) {
+					window.parent.clwin(args[0]);
+					print('Killed process: ' + args[0], 'success-line');
+				} else {
+					print('kill: no such process: ' + args[0], 'error-line');
+				}
+				return '';
+			},
+
+			history() {
+				const lines = [];
+				cmdHistory.forEach((cmd, i) => {
+					const line = '  ' + String(i + 1).padStart(4) + '  ' + cmd;
+					print(line, 'info-line');
+					lines.push(line);
+				});
+				return lines.join('\n');
+			},
+
+			export(args) {
+				const raw = args.join(' ');
+				const eq = raw.indexOf('=');
+				if (eq === -1) { print('export: usage: export KEY=VALUE', 'error-line'); return ''; }
+				const key = raw.slice(0, eq);
+				const val = raw.slice(eq + 1);
+				env[key] = val;
+				print(key + '=' + val, 'success-line');
+				return '';
+			},
+
+			env() {
+				const keys = Object.keys(env);
+				if (keys.length === 0) { print('(no environment variables set)', 'info-line'); return ''; }
+				const lines = [];
+				keys.forEach(k => {
+					const line = k + '=' + env[k];
+					print(line);
+					lines.push(line);
+				});
+				return lines.join('\n');
+			},
+
+			async install(args) {
+				if (!args[0]) { print('install: specify an app name', 'error-line'); return ''; }
+				const appName = args[0].toLowerCase();
+				try {
+					print('Installing ' + appName + '...', 'info-line');
+					await window.parent.openapp(appName, 1);
+					print('Installed and opened: ' + appName, 'success-line');
+				} catch(e) { print('install: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			async theme(args) {
+				if (!args[0]) { print('theme: specify dark or light', 'error-line'); return ''; }
+				try {
+					await window.parent.setSetting('dm', args[0] === 'light' ? 'light' : 'dark');
+					if (typeof window.parent.checkdmode === 'function') window.parent.checkdmode();
+					print('Theme set to: ' + args[0], 'success-line');
+				} catch(e) { print('theme: error: ' + e.message, 'error-line'); }
+				return '';
+			},
+
+			reboot() {
+				print('Rebooting CTRL...', 'info-line');
+				setTimeout(() => { window.parent.location.reload(); }, 1000);
+				return '';
+			},
+
+			logout() {
+				print('Logging out...', 'info-line');
+				setTimeout(() => { window.parent.logoutofCTRL(); }, 500);
+				return '';
+			},
+
+			exit() {
+				if (myWindow && myWindow.windowID) {
+					ntxSession.send('sysUI.clwin', myWindow.windowID);
+				} else {
+					const winuid = window.frameElement?.closest('.window')?.getAttribute('data-winuid');
+					if (winuid) window.parent.clwin(winuid);
+				}
+				return '';
+			}
+		};
+
+		// ── Execute a single parsed command (with optional stdin) ──
+
+		async function execSingle(segment, stdin) {
+			segment = segment.trim();
+			if (!segment) return '';
+
+			// Parse redirect
+			const { segment: cmdPart, outFile, appendMode } = parseRedirect(segment);
+
+			// Variable expansion
+			const expanded = cmdPart.replace(/\$(\w+)/g, (_, key) => env[key] || '');
+
+			const tokens = tokenize(expanded);
+			if (tokens.length === 0) return '';
+
+			let cmd = tokens[0].toLowerCase();
+			let args = tokens.slice(1);
+
+			// Check aliases (with loop prevention)
+			if (aliases[cmd]) {
+				const aliasTokens = tokenize(aliases[cmd]);
+				cmd = aliasTokens[0].toLowerCase();
+				args = aliasTokens.slice(1).concat(args);
+			}
+
+			let result = '';
+			if (commands[cmd]) {
+				try {
+					result = await commands[cmd](args, stdin) || '';
+				} catch(e) {
+					print('Error: ' + e.message, 'error-line');
+					return '';
+				}
+			} else {
+				print(cmd + ': command not found. Type "help" for available commands.', 'error-line');
+				return '';
+			}
+
+			// Handle redirect: write or append output to file
+			if (outFile && result) {
+				const resolvedOut = resolvePath(outFile);
+				const { dirPath, name } = splitParentAndName(resolvedOut);
+				const folder = dirPath ? dirPath + '/' : (cwd ? cwd + '/' : '');
+				const baseName = name.includes('.') ? name.split('.').slice(0, -1).join('.') : name;
+				const ext = name.includes('.') ? name.split('.').pop() : 'txt';
+				try {
+					if (appendMode) {
+						// Read existing + append
+						const existingFe = getFileEntry(resolvedOut);
+						let newContent = result;
+						if (existingFe) {
+							const existing = await readFileContent(existingFe.entry.id);
+							newContent = existing + '\n' + result;
+							await window.parent.remfile(existingFe.entry.id);
+						}
+						await window.parent.createFile(folder, baseName, ext, newContent);
+						print('Output appended to: ' + outFile, 'success-line');
+					} else {
+						// Overwrite: remove existing first if present
+						const existingFe = getFileEntry(resolvedOut);
+						if (existingFe) {
+							await window.parent.remfile(existingFe.entry.id);
+						}
+						await window.parent.createFile(folder, baseName, ext, result);
+						print('Output written to: ' + outFile, 'success-line');
+					}
+				} catch(e) {
+					print('redirect: error writing to ' + outFile + ': ' + e.message, 'error-line');
+				}
+			}
+
+			return result;
+		}
+
+		// ── Run full command line with pipes ──
+
+		async function runCommand(line) {
+			line = line.trim();
+			if (!line) return;
+
+			// Handle pending confirmation (rm)
+			if (pendingConfirm) {
+				const fn = pendingConfirm;
+				pendingConfirm = null;
+				print(promptEl.textContent + line, 'cmd-line');
+				await fn(line);
+				return;
+			}
+
+			cmdHistory.push(line);
+			historyIndex = cmdHistory.length;
+			print(promptEl.textContent + line, 'cmd-line');
+
+			const chains = parseCommandLine(line);
+			for (const chain of chains) {
+				const pipeSegments = parsePipes(chain);
+				if (pipeSegments.length === 1) {
+					await execSingle(pipeSegments[0], null);
+				} else {
+					// Execute pipe chain: stdout of left becomes stdin of right
+					let pipeData = null;
+					for (let i = 0; i < pipeSegments.length; i++) {
+						const isLast = (i === pipeSegments.length - 1);
+						if (!isLast) {
+							// Suppress visible output for intermediate stages by
+							// temporarily swapping print to a no-op; the command's
+							// return value carries the data forward.
+							const savedNodes = output.childNodes.length;
+							pipeData = await execSingle(pipeSegments[i], pipeData);
+							// Remove any nodes printed during the intermediate stage
+							while (output.childNodes.length > savedNodes) {
+								output.removeChild(output.lastChild);
+							}
+						} else {
+							pipeData = await execSingle(pipeSegments[i], pipeData);
+						}
+					}
+				}
+			}
+		}
+
+		// ── Tab Completion ──
+
+		function getCompletions(text) {
+			const parts = text.split(/\s+/);
+			if (parts.length <= 1) {
+				const partial = parts[0].toLowerCase();
+				const cmdNames = Object.keys(commands);
+				const aliasNames = Object.keys(aliases);
+				const all = [...new Set([...cmdNames, ...aliasNames])];
+				return all.filter(c => c.startsWith(partial)).map(c => c + ' ');
+			}
+			const partial = parts[parts.length - 1];
+			const resolvedPartial = resolvePath(partial);
+			const { dirPath, name: partialName } = splitParentAndName(resolvedPartial);
+
+			let searchDir, searchPath;
+			if (partialName === '' || partial.endsWith('/')) {
+				searchDir = getMemoryAtPath(resolvedPartial);
+				searchPath = partial.endsWith('/') ? partial : '';
+			} else {
+				searchDir = getMemoryAtPath(dirPath);
+				searchPath = partial.slice(0, partial.length - partialName.length);
+			}
+
+			if (!searchDir || typeof searchDir !== 'object' || searchDir.id) return [];
+
+			const entries = Object.keys(searchDir).filter(k => k !== '_id');
+			const prefix = parts.length > 1 ? parts.slice(0, -1).join(' ') + ' ' : '';
+
+			if (partialName === '' || partial.endsWith('/')) {
+				return entries.map(e => prefix + searchPath + e);
+			}
+
+			return entries
+				.filter(e => {
+					const eName = e.endsWith('/') ? e.slice(0, -1) : e;
+					return eName.toLowerCase().startsWith(partialName.toLowerCase());
+				})
+				.map(e => prefix + searchPath + e);
+		}
+
+		// ── Input Handler ──
+
+		input.addEventListener('keydown', async (e) => {
+			if (e.key === 'Enter') {
+				const line = input.value;
+				input.value = '';
+				await runCommand(line);
+			} else if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				if (historyIndex > 0) { historyIndex--; input.value = cmdHistory[historyIndex] || ''; }
+			} else if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				if (historyIndex < cmdHistory.length - 1) { historyIndex++; input.value = cmdHistory[historyIndex] || ''; }
+				else { historyIndex = cmdHistory.length; input.value = ''; }
+			} else if (e.key === 'Tab') {
+				e.preventDefault();
+				const completions = getCompletions(input.value);
+				if (completions.length === 1) {
+					input.value = completions[0];
+				} else if (completions.length > 1) {
+					print(completions.map(c => c.split(/\s+/).pop()).join('  '), 'tab-suggest');
+					let common = completions[0];
+					for (let i = 1; i < completions.length; i++) {
+						while (!completions[i].startsWith(common)) {
+							common = common.slice(0, -1);
+						}
+					}
+					if (common.length > input.value.length) input.value = common;
+				}
+			} else if (e.key === 'l' && e.ctrlKey) {
+				e.preventDefault();
+				commands.clear();
+			} else if (e.key === 'c' && e.ctrlKey) {
+				e.preventDefault();
+				if (pendingConfirm) {
+					pendingConfirm = null;
+					print('^C', 'error-line');
+				} else {
+					print(promptEl.textContent + input.value + '^C', 'error-line');
+					input.value = '';
+				}
+			}
+		});
+
+		// Click anywhere to focus input
+		document.getElementById('terminal').addEventListener('click', () => input.focus());
+	</script>
+</body>
+</html>

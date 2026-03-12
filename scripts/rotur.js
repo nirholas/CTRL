@@ -1711,7 +1711,7 @@ function roturTWEventCall(data) {
           await roturExtension.loginToken({ TOKEN: JSON.parse(localroturdata).token })
         }
       } else {
-        roturExtension.login_prompt({ STYLE_URL: "https://ctrl.surf/ctrl-dev-repl-rl/libs/roturstyle.css" });
+        roturExtension.login_prompt({ STYLE_URL: "https://ctrl.best/ctrl-dev-repl-rl/libs/roturstyle.css" });
       }
     })();
   }

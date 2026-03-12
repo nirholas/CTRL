@@ -12,8 +12,29 @@
 	<link rel="icon" type="image/png" href="ctrl.png">
 	<!--CTRL scripts-->
 	<script src="scripts/utility.js"></script>
+	<script src="scripts/security.js"></script>
+	<script src="scripts/audio.js" defer></script>
+	<script src="scripts/sounds.js" defer></script>
 	<script src="script.js" defer></script>
 	<script src="scripts/os-features.js" defer></script>
+	<script src="scripts/permissions.js" defer></script>
+	<script src="scripts/hotkeys.js" defer></script>
+	<script src="scripts/shortcuts.js" defer></script>
+	<script src="scripts/lockscreen.js" defer></script>
+	<script src="scripts/gestures.js" defer></script>
+	<script src="scripts/widgets.js" defer></script>
+	<script src="scripts/terminal.js" defer></script>
+	<script src="scripts/dragdrop.js" defer></script>
+	<script src="scripts/workspaces.js" defer></script>
+	<script src="scripts/dock-enhancements.js" defer></script>
+	<script src="scripts/spotlight.js" defer></script>
+	<script src="scripts/backup.js" defer></script>
+	<script src="scripts/previews.js" defer></script>
+	<script src="scripts/popout.js" defer></script>
+	<script src="scripts/os-enhancements.js" defer></script>
+	<script src="scripts/hotkeys.js" defer></script>
+	<script src="scripts/spotlight.js" defer></script>
+	<script src="scripts/terminal.js" defer></script>
 	<!--PWA Manifest-->
 	<link href="webmanifest.json" rel="manifest">
 	<!--Google Icons-->
@@ -439,6 +460,69 @@
 
 	<!-- Show Desktop button (appended to taskbar by os-features.js) -->
 	<div id="showDesktopBtn" class="show-desktop-btn" title="Show Desktop"></div>
+
+	<!-- Spotlight Search overlay -->
+	<div id="spotlight" class="spotlight-overlay" style="display:none;">
+		<div class="spotlight-container">
+			<div class="spotlight-input-wrap">
+				<span class="material-symbols-rounded spotlight-search-icon">search</span>
+				<input type="text" id="spotlight-input" class="spotlight-input" placeholder="Search apps, files, settings..." autocomplete="off" spellcheck="false">
+			</div>
+			<div id="spotlight-results" class="spotlight-results"></div>
+		</div>
+	</div>
+
+	<!-- Lock Screen overlay -->
+	<div id="lockscreen-overlay" class="lockscreen-overlay hidden" style="display:none;">
+		<img id="lockscreen-bg" class="lockscreen-bg" alt="">
+		<div id="lock-cover" class="lock-cover">
+			<div id="lock-cover-time" class="lock-cover-time">00:00</div>
+			<div id="lock-cover-date" class="lock-cover-date"></div>
+			<div class="lock-cover-hint">Click or press any key to unlock</div>
+		</div>
+		<div id="lock-login" class="lock-login">
+			<div id="lock-avatar" class="lock-avatar"></div>
+			<div id="lock-username" class="lock-username">User</div>
+			<form id="lock-form" class="lock-form" onsubmit="event.preventDefault(); unlockScreen();">
+				<div class="lock-input-wrap">
+					<input id="lock-password" type="password" placeholder="Password" autocomplete="off">
+					<button type="button" id="lock-toggle-vis" class="lock-toggle-vis">
+						<span class="material-symbols-rounded">visibility</span>
+					</button>
+				</div>
+				<button type="submit" class="lock-submit">
+					<span class="material-symbols-rounded">arrow_forward</span>
+				</button>
+			</form>
+			<div id="lock-error" class="lock-error"></div>
+		</div>
+	</div>
+
+	<!-- Power overlay (shutdown/restart) -->
+	<div id="power-overlay" class="power-overlay" style="display:none;">
+		<div id="power-spinner" class="power-spinner" style="display:none;">
+			<div class="power-spinner-ring"></div>
+		</div>
+		<div id="power-message" class="power-message"></div>
+		<div id="power-hint" class="power-hint" style="display:none;"></div>
+	</div>
+
+	<!-- Widget Board -->
+	<div id="widget-board" class="widget-board">
+		<div class="widget-board-header">
+			<h3>Widgets</h3>
+			<button id="widget-board-close" class="widget-board-close" onclick="WidgetEngine.toggleBoard()">
+				<span class="material-symbols-rounded">close</span>
+			</button>
+		</div>
+		<div id="widget-board-body" class="widget-board-body"></div>
+	</div>
+
+	<!-- Workspace switcher dots (injected into taskbar by workspaces.js) -->
+	<div id="workspace-switcher" class="workspace-switcher"></div>
+
+	<!-- Sounds initialization -->
+	<script>window.agentSounds = new CTRLSounds();</script>
 </body>
 
 </html>

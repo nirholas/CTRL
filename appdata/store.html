@@ -1122,7 +1122,7 @@
 		function loadThemes() {
 			const container = document.getElementById("themeslist");
 
-			fetch('https://ctrl.surf/CTRL-Store/db/themes.json')
+			fetch('https://ctrl.best/CTRL-Store/db/themes.json')
 				.then(response => response.json())
 				.then(data => {
 					container.innerHTML = '';
@@ -1290,7 +1290,7 @@
 
 		async function installapp(x, appName, obj, method = "icononly") {
 			let prefixurl = "";
-			if (!x.src.startsWith("http")) prefixurl = "https://ctrl.surf/CTRL-Store/apps/";
+			if (!x.src.startsWith("http")) prefixurl = "https://ctrl.best/CTRL-Store/apps/";
 			try {
 				if (obj) {
 					if (method == "icononly") obj.innerText = "hourglass_top";
@@ -1352,7 +1352,7 @@
 
 
 	async function fetchAppData() {
-		return await fetch('https://ctrl.surf/CTRL-Store/db/v2.json')
+		return await fetch('https://ctrl.best/CTRL-Store/db/v2.json')
 			.then(response => {
 				if (!response.ok) throw new Error('Network response was not ok');
 				return response.json();
@@ -2073,7 +2073,7 @@
 			const resultsDiv = document.getElementById("searchOutputList");
 			resultsDiv.style.display = 'grid';
 			resultsDiv.innerHTML = "<div class='loader'></div>";
-			fetch("https://ctrl.surf/CTRL-Store/db/v2.json")
+			fetch("https://ctrl.best/CTRL-Store/db/v2.json")
 				.then(response => response.json())
 				.then(data => {
 					const threshold = 0.6;

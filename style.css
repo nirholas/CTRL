@@ -2686,3 +2686,411 @@ dialog#nich {
 
 	}
 }
+
+/* ══════════════════════════════════════════════
+   Spotlight Search
+   ══════════════════════════════════════════════ */
+.spotlight-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 18vh;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	animation: spotlightFadeIn 0.15s ease-out;
+}
+@keyframes spotlightFadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+.spotlight-container {
+	width: 560px;
+	max-width: 90vw;
+	background: var(--col-bg1, #1a1a2e);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 16px;
+	box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+	overflow: hidden;
+}
+.spotlight-input-wrap {
+	display: flex;
+	align-items: center;
+	padding: 14px 18px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	gap: 12px;
+}
+.spotlight-search-icon {
+	color: rgba(255, 255, 255, 0.4);
+	font-size: 22px;
+	flex-shrink: 0;
+}
+.spotlight-input {
+	flex: 1;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: var(--col-txt1, #e0e0e0);
+	font-size: 17px;
+	font-family: inherit;
+}
+.spotlight-input::placeholder {
+	color: rgba(255, 255, 255, 0.3);
+}
+.spotlight-results {
+	max-height: 380px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+.spotlight-results::-webkit-scrollbar {
+	width: 5px;
+}
+.spotlight-results::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.12);
+	border-radius: 3px;
+}
+.spotlight-category-label {
+	padding: 8px 18px 4px;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+	color: rgba(255, 255, 255, 0.35);
+	font-weight: 600;
+}
+.spotlight-result {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 18px;
+	cursor: pointer;
+	transition: background 0.12s;
+}
+.spotlight-result:hover,
+.spotlight-result.selected {
+	background: rgba(97, 121, 255, 0.12);
+}
+.spotlight-result .material-symbols-rounded {
+	font-size: 20px;
+	color: rgba(255, 255, 255, 0.5);
+	flex-shrink: 0;
+}
+.spotlight-result-text {
+	flex: 1;
+	min-width: 0;
+}
+.spotlight-result-title {
+	font-size: 14px;
+	color: var(--col-txt1, #e0e0e0);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.spotlight-result-subtitle {
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.35);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.spotlight-result-shortcut {
+	font-size: 11px;
+	color: rgba(255, 255, 255, 0.25);
+	flex-shrink: 0;
+}
+.spotlight-no-results {
+	padding: 24px;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.3);
+	font-size: 14px;
+}
+
+/* ══════════════════════════════════════════════
+   Mission Control
+   ══════════════════════════════════════════════ */
+.mission-control {
+	position: fixed;
+	inset: 0;
+	z-index: 99990;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: mcFadeIn 0.25s ease-out;
+}
+.mission-control[hidden] {
+	display: none !important;
+}
+@keyframes mcFadeIn {
+	from { opacity: 0; transform: scale(0.95); }
+	to { opacity: 1; transform: scale(1); }
+}
+.mc-windows-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+	justify-content: center;
+	align-items: center;
+	max-width: 90vw;
+	max-height: 80vh;
+	padding: 32px;
+}
+
+/* ══════════════════════════════════════════════
+   Notification Center
+   ══════════════════════════════════════════════ */
+.notification-center {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 360px;
+	max-width: 100vw;
+	height: 100vh;
+	z-index: 99980;
+	background: var(--col-bg1, #1a1a2e);
+	border-left: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+	transform: translateX(0);
+	transition: transform 0.25s ease;
+	padding: 20px;
+	overflow-y: auto;
+}
+.notification-center[hidden] {
+	transform: translateX(100%);
+	display: block !important;
+	pointer-events: none;
+}
+.notification-center h2 {
+	font-size: 16px;
+	margin-bottom: 16px;
+	color: var(--col-txt1, #e0e0e0);
+}
+.nc-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.nc-empty {
+	text-align: center;
+	color: rgba(255, 255, 255, 0.3);
+	padding: 40px 0;
+}
+
+/* ══════════════════════════════════════════════
+   Show Desktop Button
+   ══════════════════════════════════════════════ */
+.show-desktop-btn {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: 8px;
+	height: 48px;
+	z-index: 99970;
+	cursor: pointer;
+	background: rgba(255, 255, 255, 0.06);
+	transition: background 0.15s;
+}
+.show-desktop-btn:hover {
+	background: rgba(97, 121, 255, 0.3);
+}
+
+/* ══════════════════════════════════════════════
+   Permission Prompt (from permissions.js)
+   ══════════════════════════════════════════════ */
+.permission-prompt-modal::backdrop {
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+}
+
+/* ══════════════════════════════════════════════
+   Glass / Blur Effects (Win12 Wave 1)
+   ══════════════════════════════════════════════ */
+
+/* Window glass effect */
+.window .titbar {
+	backdrop-filter: blur(20px) saturate(1.5);
+	-webkit-backdrop-filter: blur(20px) saturate(1.5);
+	background: rgba(26, 26, 46, 0.75) !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Taskbar glass */
+#ctrlnav {
+	backdrop-filter: blur(24px) saturate(1.8);
+	-webkit-backdrop-filter: blur(24px) saturate(1.8);
+	background: rgba(18, 18, 36, 0.7) !important;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Context menu glass */
+.ctx-menu,
+.ctxmenu {
+	backdrop-filter: blur(20px) saturate(1.5);
+	-webkit-backdrop-filter: blur(20px) saturate(1.5);
+	background: rgba(26, 26, 46, 0.85) !important;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 10px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Start menu / app launcher glass */
+#appdmod {
+	backdrop-filter: blur(30px) saturate(1.6);
+	-webkit-backdrop-filter: blur(30px) saturate(1.6);
+	background: rgba(20, 20, 40, 0.8) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+	box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* Search panel glass */
+#searchwindow {
+	backdrop-filter: blur(24px) saturate(1.5);
+	-webkit-backdrop-filter: blur(24px) saturate(1.5);
+	background: rgba(20, 20, 40, 0.85) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+}
+
+/* Notification panel glass */
+.notification-center {
+	backdrop-filter: blur(24px) saturate(1.5);
+	-webkit-backdrop-filter: blur(24px) saturate(1.5);
+	background: rgba(18, 18, 36, 0.85) !important;
+}
+
+/* Dialog glass */
+dialog.scalableui {
+	backdrop-filter: blur(16px) saturate(1.3);
+	-webkit-backdrop-filter: blur(16px) saturate(1.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.12);
+	border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* ══════════════════════════════════════════════
+   Window Animations (Win12 Wave 1)
+   ══════════════════════════════════════════════ */
+
+@keyframes winOpen {
+	from {
+		opacity: 0;
+		transform: scale(0.88) translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes winClose {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.92) translateY(12px);
+	}
+}
+
+@keyframes winMinimize {
+	from {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.6) translateY(40vh);
+	}
+}
+
+@keyframes winRestore {
+	from {
+		opacity: 0;
+		transform: scale(0.6) translateY(40vh);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes winMaximize {
+	from {
+		border-radius: 10px;
+	}
+	to {
+		border-radius: 0;
+	}
+}
+
+/* Apply animations to windows */
+.window {
+	animation: winOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.window.closing {
+	animation: winClose 0.2s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+.window.minimizing {
+	animation: winMinimize 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+.window.restoring {
+	animation: winRestore 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ══════════════════════════════════════════════
+   Dark Mode CSS Variables (Win12 Wave 1)
+   ══════════════════════════════════════════════ */
+
+:root {
+	--glass-bg: rgba(26, 26, 46, 0.75);
+	--glass-border: rgba(255, 255, 255, 0.08);
+	--glass-blur: blur(20px) saturate(1.5);
+	--shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+	--shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.5);
+	--accent-primary: #6179ff;
+	--accent-success: #6bff8e;
+	--accent-warning: #f0ad4e;
+	--accent-danger: #ff6b6b;
+	--accent-info: #00bcd4;
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 16px;
+	--transition-fast: 0.15s ease;
+	--transition-normal: 0.25s ease;
+	--transition-slow: 0.4s ease;
+}
+
+/* Accessibility: Screen reader only */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+}

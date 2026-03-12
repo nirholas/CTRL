@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Task Manager</title>
+	<meta name="permissions" content="unsandboxed">
+	<meta name="CTRL-icon" content="<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48' fill='none'><rect width='48' height='48' rx='8' fill='#1a1a2e'/><rect x='8' y='10' width='32' height='4' rx='2' fill='#6bff8e' opacity='0.8'/><rect x='8' y='18' width='24' height='4' rx='2' fill='#93a8ff' opacity='0.7'/><rect x='8' y='26' width='28' height='4' rx='2' fill='#a855f7' opacity='0.6'/><rect x='8' y='34' width='16' height='4' rx='2' fill='#ff6b6b' opacity='0.5'/></svg>">
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; user-select: none; }
+		.container { display: flex; flex-direction: column; height: 100%; }
+
+		/* Tabs */
+		.tabs { display: flex; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+		.tab { padding: 10px 18px; cursor: pointer; color: #808080; font-size: 12px; font-weight: 500; letter-spacing: 0.3px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+		.tab:hover { color: #b0b0b0; background: rgba(255,255,255,0.03); }
+		.tab.active { color: #6179ff; border-bottom-color: #6179ff; }
+		.tab-content { flex: 1; overflow: hidden; display: none; flex-direction: column; }
+		.tab-content.active { display: flex; }
+
+		/* ── Processes Tab ── */
+		.process-list { flex: 1; overflow-y: auto; }
+		.process-list::-webkit-scrollbar { width: 6px; }
+		.process-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+		.process-header, .process-row { display: grid; grid-template-columns: 2fr 70px 80px 90px; padding: 7px 14px; align-items: center; }
+		.process-header { background: rgba(255,255,255,0.05); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #808080; position: sticky; top: 0; z-index: 1; cursor: pointer; flex-shrink: 0; }
+		.process-header span:hover { color: #b0b0b0; }
+		.process-header span.sorted-asc::after { content: ' ▲'; font-size: 9px; }
+		.process-header span.sorted-desc::after { content: ' ▼'; font-size: 9px; }
+		.process-row { border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background 0.15s; }
+		.process-row:hover { background: rgba(97,121,255,0.08); }
+		.process-row.selected { background: rgba(97,121,255,0.18); outline: 1px solid rgba(97,121,255,0.3); }
+		.process-name { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+		.process-icon { width: 20px; height: 20px; border-radius: 4px; background: rgba(97,121,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+		.process-icon svg { width: 14px; height: 14px; }
+		.process-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.process-cpu, .process-mem { font-size: 12px; font-variant-numeric: tabular-nums; }
+		.process-status { font-size: 11px; }
+		.process-status.running { color: #6bff8e; }
+		.process-status.minimized { color: #f0ad4e; }
+		.process-status.not-responding { color: #ff6b6b; }
+
+		/* Context menu */
+		.ctx-menu { position: fixed; background: #1e1e2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 0; z-index: 9999; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+		.ctx-menu-item { padding: 8px 16px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+		.ctx-menu-item:hover { background: rgba(97,121,255,0.15); }
+		.ctx-menu-item.danger { color: #ff6b6b; }
+		.ctx-menu-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+
+		/* Toolbar */
+		.toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+		.toolbar-count { font-size: 11px; color: #808080; }
+		.toolbar-actions { display: flex; gap: 8px; }
+		.btn { padding: 5px 14px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 500; border: 1px solid transparent; transition: all 0.2s; }
+		.btn:disabled { opacity: 0.4; cursor: default; }
+		.btn-end { background: rgba(255,107,107,0.12); color: #ff6b6b; border-color: rgba(255,107,107,0.25); }
+		.btn-end:hover:not(:disabled) { background: rgba(255,107,107,0.25); }
+		.btn-restart { background: rgba(97,121,255,0.12); color: #93a8ff; border-color: rgba(97,121,255,0.25); }
+		.btn-restart:hover:not(:disabled) { background: rgba(97,121,255,0.25); }
+
+		/* ── Performance Tab ── */
+		.perf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; overflow-y: auto; flex: 1; }
+		.perf-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; }
+		.perf-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+		.perf-label { font-size: 11px; color: #808080; text-transform: uppercase; letter-spacing: 0.5px; }
+		.perf-value { font-size: 24px; font-weight: 700; color: #6179ff; }
+		.perf-bar-container { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+		.perf-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+		.perf-bar.cpu { background: linear-gradient(90deg, #6179ff, #a855f7); }
+		.perf-bar.mem { background: linear-gradient(90deg, #6bff8e, #00bcd4); }
+		.perf-bar.win { background: linear-gradient(90deg, #f0ad4e, #ff6b6b); }
+		.perf-bar.dom { background: linear-gradient(90deg, #00bcd4, #6179ff); }
+		canvas.sparkline { width: 100%; height: 48px; flex-shrink: 0; }
+		.perf-subtext { font-size: 11px; color: #606060; margin-top: 4px; }
+
+		/* Stats row below perf grid */
+		.perf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 0 14px 14px; flex-shrink: 0; }
+		.perf-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px 14px; text-align: center; }
+		.perf-stat-value { font-size: 20px; font-weight: 700; color: #e0e0e0; }
+		.perf-stat-label { font-size: 10px; color: #808080; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+		/* ── App History Tab ── */
+		.history-list { flex: 1; overflow-y: auto; padding: 0; }
+		.history-header, .history-row { display: grid; grid-template-columns: 2fr 1fr 80px; padding: 8px 14px; align-items: center; }
+		.history-header { background: rgba(255,255,255,0.05); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #808080; position: sticky; top: 0; z-index: 1; flex-shrink: 0; }
+		.history-row { border-bottom: 1px solid rgba(255,255,255,0.03); }
+		.history-row:nth-child(even) { background: rgba(255,255,255,0.015); }
+		.history-name { display: flex; align-items: center; gap: 8px; }
+		.history-empty { text-align: center; color: #606060; padding: 40px 20px; font-size: 13px; }
+
+		/* ── Details Tab ── */
+		.details-list { flex: 1; overflow-y: auto; padding: 0; }
+		.details-header, .details-row { display: grid; grid-template-columns: 2fr 100px 120px 70px 70px; padding: 7px 14px; align-items: center; font-size: 12px; }
+		.details-header { background: rgba(255,255,255,0.05); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #808080; position: sticky; top: 0; z-index: 1; flex-shrink: 0; }
+		.details-row { border-bottom: 1px solid rgba(255,255,255,0.03); }
+		.details-row:nth-child(even) { background: rgba(255,255,255,0.015); }
+		.detail-mono { font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 11px; color: #93a8ff; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="tabs">
+			<div class="tab active" data-tab="processes">Processes</div>
+			<div class="tab" data-tab="performance">Performance</div>
+			<div class="tab" data-tab="history">App History</div>
+			<div class="tab" data-tab="details">Details</div>
+		</div>
+
+		<!-- ── Processes ── -->
+		<div id="processes" class="tab-content active">
+			<div class="process-header" id="process-header">
+				<span data-sort="name">Name</span>
+				<span data-sort="cpu">CPU</span>
+				<span data-sort="mem">Memory</span>
+				<span data-sort="status">Status</span>
+			</div>
+			<div class="process-list" id="process-list"></div>
+			<div class="toolbar">
+				<span class="toolbar-count" id="process-count">0 processes</span>
+				<div class="toolbar-actions">
+					<button class="btn btn-restart" id="btn-restart" disabled>Restart</button>
+					<button class="btn btn-end" id="btn-end" disabled>End Task</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Performance ── -->
+		<div id="performance" class="tab-content">
+			<div class="perf-grid">
+				<div class="perf-card">
+					<div class="perf-header"><span class="perf-label">CPU Usage</span><span class="perf-value" id="cpu-val">0%</span></div>
+					<div class="perf-bar-container"><div class="perf-bar cpu" id="cpu-bar" style="width:0%"></div></div>
+					<canvas class="sparkline" id="cpu-spark"></canvas>
+					<div class="perf-subtext" id="cpu-sub">Cores: --</div>
+				</div>
+				<div class="perf-card">
+					<div class="perf-header"><span class="perf-label">Memory</span><span class="perf-value" id="mem-val">0 MB</span></div>
+					<div class="perf-bar-container"><div class="perf-bar mem" id="mem-bar" style="width:0%"></div></div>
+					<canvas class="sparkline" id="mem-spark"></canvas>
+					<div class="perf-subtext" id="mem-sub">--</div>
+				</div>
+				<div class="perf-card">
+					<div class="perf-header"><span class="perf-label">Open Windows</span><span class="perf-value" id="win-val">0</span></div>
+					<div class="perf-bar-container"><div class="perf-bar win" id="win-bar" style="width:0%"></div></div>
+					<canvas class="sparkline" id="win-spark"></canvas>
+					<div class="perf-subtext" id="win-sub">Window Manager Active</div>
+				</div>
+				<div class="perf-card">
+					<div class="perf-header"><span class="perf-label">DOM Nodes</span><span class="perf-value" id="dom-val">0</span></div>
+					<div class="perf-bar-container"><div class="perf-bar dom" id="dom-bar" style="width:0%"></div></div>
+					<canvas class="sparkline" id="dom-spark"></canvas>
+					<div class="perf-subtext" id="dom-sub">--</div>
+				</div>
+			</div>
+			<div class="perf-stats">
+				<div class="perf-stat"><div class="perf-stat-value" id="stat-uptime">0:00:00</div><div class="perf-stat-label">Uptime</div></div>
+				<div class="perf-stat"><div class="perf-stat-value" id="stat-cores">--</div><div class="perf-stat-label">CPU Cores</div></div>
+				<div class="perf-stat"><div class="perf-stat-value" id="stat-fps">--</div><div class="perf-stat-label">FPS</div></div>
+			</div>
+		</div>
+
+		<!-- ── App History ── -->
+		<div id="history" class="tab-content">
+			<div class="history-header">
+				<span>App Name</span>
+				<span>Total Run Time</span>
+				<span>Opened</span>
+			</div>
+			<div class="history-list" id="history-list"></div>
+		</div>
+
+		<!-- ── Details ── -->
+		<div id="details" class="tab-content">
+			<div class="details-header">
+				<span>Name</span>
+				<span>Window ID</span>
+				<span>Source</span>
+				<span>Z-Index</span>
+				<span>DOM</span>
+			</div>
+			<div class="details-list" id="details-list"></div>
+		</div>
+	</div>
+
+	<script>
+	(function () {
+		'use strict';
+
+		// ── State ──
+		let selectedKey = null;
+		let sortColumn = 'name';
+		let sortAsc = true;
+		let ctxMenu = null;
+		const appHistory = {}; // { appid: { name, opens, startedAt, totalMs } }
+		const sparkHistory = { cpu: [], mem: [], win: [], dom: [] };
+		const SPARK_MAX = 40;
+		let lastCpuTime = performance.now();
+		let lastIdleEstimate = 0;
+		let frameCount = 0;
+		let lastFpsTime = performance.now();
+		let currentFps = 60;
+		const heartbeatInjected = new Set();
+		const SYSTEM_APPS = ['settings', 'files', 'terminal', 'browser', 'appstore'];
+
+		// ── Helpers ──
+		function parentWinds() { try { return window.parent.winds || {}; } catch(e) { return {}; } }
+		function parentDoc() { try { return window.parent.document; } catch(e) { return null; } }
+
+		function escapeText(str) {
+			var d = document.createElement('div');
+			d.textContent = str;
+			return d.innerHTML;
+		}
+
+		function formatBytes(bytes) {
+			if (bytes < 1024) return bytes + ' B';
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+			return (bytes / 1048576).toFixed(1) + ' MB';
+		}
+
+		function formatDuration(ms) {
+			var s = Math.floor(ms / 1000);
+			var h = Math.floor(s / 3600);
+			var m = Math.floor((s % 3600) / 60);
+			s = s % 60;
+			if (h > 0) return h + 'h ' + m + 'm ' + s + 's';
+			if (m > 0) return m + 'm ' + s + 's';
+			return s + 's';
+		}
+
+		function formatUptime(ms) {
+			var s = Math.floor(ms / 1000);
+			var h = Math.floor(s / 3600);
+			var m = Math.floor((s % 3600) / 60);
+			s = s % 60;
+			return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+		}
+
+		// ── Tab switching ──
+		document.querySelectorAll('.tab').forEach(function(tab) {
+			tab.addEventListener('click', function() {
+				document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+				document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+				tab.classList.add('active');
+				document.getElementById(tab.dataset.tab).classList.add('active');
+			});
+		});
+
+		// ── Sparkline drawing ──
+		function drawSparkline(canvasId, data, color) {
+			var canvas = document.getElementById(canvasId);
+			if (!canvas) return;
+			var ctx = canvas.getContext('2d');
+			var dpr = window.devicePixelRatio || 1;
+			canvas.width = canvas.offsetWidth * dpr;
+			canvas.height = canvas.offsetHeight * dpr;
+			ctx.scale(dpr, dpr);
+			var w = canvas.offsetWidth, h = canvas.offsetHeight;
+			ctx.clearRect(0, 0, w, h);
+			if (data.length < 2) return;
+			var max = Math.max(100, Math.max.apply(null, data));
+
+			// Grid lines
+			ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+			ctx.lineWidth = 1;
+			for (var g = 0; g < 4; g++) {
+				var gy = (g / 4) * h;
+				ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+			}
+
+			// Line
+			ctx.beginPath();
+			ctx.strokeStyle = color;
+			ctx.lineWidth = 1.5;
+			ctx.lineJoin = 'round';
+			for (var i = 0; i < data.length; i++) {
+				var x = (i / (SPARK_MAX - 1)) * w;
+				var y = h - (data[i] / max) * (h - 4) - 2;
+				if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+			}
+			ctx.stroke();
+
+			// Fill gradient
+			var lastX = ((data.length - 1) / (SPARK_MAX - 1)) * w;
+			ctx.lineTo(lastX, h);
+			ctx.lineTo(0, h);
+			ctx.closePath();
+			var grad = ctx.createLinearGradient(0, 0, 0, h);
+			grad.addColorStop(0, color.replace(')', ', 0.15)').replace('rgb', 'rgba'));
+			grad.addColorStop(1, color.replace(')', ', 0.02)').replace('rgb', 'rgba'));
+			ctx.fillStyle = grad;
+			ctx.fill();
+		}
+
+		function pushSpark(key, val) {
+			sparkHistory[key].push(val);
+			if (sparkHistory[key].length > SPARK_MAX) sparkHistory[key].shift();
+		}
+
+		// ── FPS counter ──
+		function fpsLoop() {
+			frameCount++;
+			var now = performance.now();
+			if (now - lastFpsTime >= 1000) {
+				currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+				frameCount = 0;
+				lastFpsTime = now;
+			}
+			requestAnimationFrame(fpsLoop);
+		}
+		requestAnimationFrame(fpsLoop);
+
+		// ── CPU estimation via busy-loop timing ──
+		function estimateCpu() {
+			var wins = parentWinds();
+			var count = Object.keys(wins).length;
+			// Use a lightweight heuristic: base load + per-window load + jitter
+			var base = 3 + count * 6;
+			// Add timing-based jitter measured from frame timing
+			var timingJitter = Math.max(0, (1000 / Math.max(currentFps, 1)) - 16.67);
+			var cpuEst = Math.min(98, base + timingJitter * 2 + Math.random() * 4);
+			return Math.round(cpuEst);
+		}
+
+		// ── Estimate per-process memory from DOM ──
+		function estimateProcessMem(key) {
+			var pDoc = parentDoc();
+			if (!pDoc) return 0;
+			var winEl = pDoc.getElementById('window' + key);
+			if (!winEl) return 0;
+			var iframe = winEl.querySelector('iframe');
+			var nodeCount = 0;
+			if (iframe) {
+				try { nodeCount = iframe.contentDocument.querySelectorAll('*').length; } catch(e) { nodeCount = 50; }
+			}
+			// Rough estimate: ~2KB per DOM node + base overhead
+			return nodeCount * 2048 + 524288;
+		}
+
+		// ── Estimate per-process CPU ──
+		function estimateProcessCpu(key, totalCpu, totalWindows) {
+			var wins = parentWinds();
+			var w = wins[key];
+			if (!w) return 0;
+			if (w.visualState === 'minimized') return Math.round(Math.random() * 2);
+			// Distribute CPU roughly equally among visible windows with some variation
+			var share = totalWindows > 0 ? totalCpu / totalWindows : 0;
+			return Math.round(Math.max(1, share + (Math.random() - 0.5) * 6));
+		}
+
+		// ── Heartbeat injection for Not Responding detection ──
+		function injectHeartbeat(iframe, key) {
+			if (heartbeatInjected.has(key)) return;
+			try {
+				var iframeWin = iframe.contentWindow;
+				if (!iframeWin || !iframeWin.document) return;
+				iframeWin._ctrlLastFrame = Date.now();
+				(function rafLoop() {
+					iframeWin._ctrlLastFrame = Date.now();
+					iframeWin.requestAnimationFrame(rafLoop);
+				})();
+				heartbeatInjected.add(key);
+			} catch(e) {}
+		}
+
+		function getProcessStatus(key) {
+			var wins = parentWinds();
+			var w = wins[key];
+			if (!w) return 'running';
+			if (w.visualState === 'minimized') return 'minimized';
+			var pDoc = parentDoc();
+			if (!pDoc) return 'running';
+			var winEl = pDoc.getElementById('window' + key);
+			if (!winEl) return 'running';
+			var iframe = winEl.querySelector('iframe');
+			if (iframe) {
+				injectHeartbeat(iframe, key);
+				try {
+					var lastFrame = iframe.contentWindow._ctrlLastFrame;
+					if (lastFrame && Date.now() - lastFrame > 5000) return 'not-responding';
+				} catch(e) {}
+			}
+			return 'running';
+		}
+
+		// ── Track app history ──
+		function updateAppHistory() {
+			var wins = parentWinds();
+			var now = Date.now();
+			var activeKeys = new Set(Object.keys(wins));
+
+			// Merge from parent processHistory if available
+			try {
+				var ph = window.parent.processHistory;
+				if (ph) {
+					Object.keys(ph).forEach(function(appid) {
+						var entry = ph[appid];
+						if (!appHistory[appid]) {
+							appHistory[appid] = { name: entry.name, opens: entry.opens, totalMs: entry.totalMs, startedAt: entry.startedAt };
+						} else {
+							appHistory[appid].name = entry.name;
+							appHistory[appid].opens = entry.opens;
+							appHistory[appid].totalMs = entry.totalMs;
+							appHistory[appid].startedAt = entry.startedAt;
+						}
+					});
+				}
+			} catch(e) {}
+
+			// Track new windows not yet in history
+			Object.keys(wins).forEach(function(key) {
+				var w = wins[key];
+				var appid = w.appid || key;
+				if (!appHistory[appid]) {
+					appHistory[appid] = { name: w.title || appid, opens: 1, totalMs: 0, startedAt: now };
+				}
+			});
+		}
+
+		// ──────────────────────────────────────
+		// Processes Tab
+		// ──────────────────────────────────────
+
+		function refreshProcesses() {
+			var wins = parentWinds();
+			var keys = Object.keys(wins);
+			var list = document.getElementById('process-list');
+			var totalCpu = estimateCpu();
+
+			// Build process data
+			var processes = keys.map(function(key) {
+				var w = wins[key];
+				return {
+					key: key,
+					name: w.title || 'Unknown',
+					appid: w.appid || '',
+					cpu: estimateProcessCpu(key, totalCpu, keys.length),
+					mem: estimateProcessMem(key),
+					status: getProcessStatus(key),
+					icon: w.icon || ''
+				};
+			});
+
+			// Sort
+			processes.sort(function(a, b) {
+				var va, vb;
+				switch (sortColumn) {
+					case 'cpu': va = a.cpu; vb = b.cpu; break;
+					case 'mem': va = a.mem; vb = b.mem; break;
+					case 'status': va = a.status; vb = b.status; break;
+					default: va = a.name.toLowerCase(); vb = b.name.toLowerCase();
+				}
+				if (va < vb) return sortAsc ? -1 : 1;
+				if (va > vb) return sortAsc ? 1 : -1;
+				return 0;
+			});
+
+			// Check if selection is still valid
+			if (selectedKey && !wins[selectedKey]) selectedKey = null;
+
+			// ── DOM diffing: update in place instead of rebuilding ──
+			var existingRows = {};
+			list.querySelectorAll('.process-row').forEach(function(row) {
+				existingRows[row.getAttribute('data-key')] = row;
+			});
+
+			var prevSibling = null;
+			processes.forEach(function(proc) {
+				var row = existingRows[proc.key];
+				if (row) {
+					// Update existing row in place
+					delete existingRows[proc.key];
+					updateProcessRow(row, proc);
+				} else {
+					// Create new row
+					row = createProcessRow(proc);
+				}
+				// Ensure correct order
+				if (prevSibling) {
+					if (row.previousElementSibling !== prevSibling) {
+						prevSibling.after(row);
+					}
+				} else {
+					if (list.firstElementChild !== row) {
+						list.prepend(row);
+					}
+				}
+				prevSibling = row;
+			});
+
+			// Remove stale rows
+			Object.keys(existingRows).forEach(function(key) {
+				var row = existingRows[key];
+				if (row.parentNode) row.parentNode.removeChild(row);
+			});
+
+			document.getElementById('process-count').textContent = keys.length + ' process' + (keys.length !== 1 ? 'es' : '');
+			updateToolbarButtons();
+		}
+
+		function createProcessRow(proc) {
+			var row = document.createElement('div');
+			row.className = 'process-row';
+			row.setAttribute('data-key', proc.key);
+
+			// Name cell
+			var nameCell = document.createElement('div');
+			nameCell.className = 'process-name';
+			var iconSpan = document.createElement('span');
+			iconSpan.className = 'process-icon';
+			if (proc.icon) {
+				iconSpan.innerHTML = proc.icon;
+			} else {
+				iconSpan.textContent = proc.name.charAt(0).toUpperCase();
+			}
+			var titleSpan = document.createElement('span');
+			titleSpan.className = 'process-title';
+			titleSpan.textContent = proc.name;
+			nameCell.appendChild(iconSpan);
+			nameCell.appendChild(titleSpan);
+
+			// CPU cell
+			var cpuCell = document.createElement('span');
+			cpuCell.className = 'process-cpu';
+
+			// Memory cell
+			var memCell = document.createElement('span');
+			memCell.className = 'process-mem';
+
+			// Status cell
+			var statusCell = document.createElement('span');
+			statusCell.className = 'process-status';
+
+			row.appendChild(nameCell);
+			row.appendChild(cpuCell);
+			row.appendChild(memCell);
+			row.appendChild(statusCell);
+
+			updateProcessRow(row, proc);
+			bindProcessRowEvents(row, proc.key);
+
+			return row;
+		}
+
+		function updateProcessRow(row, proc) {
+			row.className = 'process-row' + (proc.key === selectedKey ? ' selected' : '');
+
+			// Update icon if changed
+			var iconSpan = row.querySelector('.process-icon');
+			if (iconSpan) {
+				if (proc.icon && iconSpan.innerHTML !== proc.icon) {
+					iconSpan.innerHTML = proc.icon;
+				} else if (!proc.icon) {
+					iconSpan.textContent = proc.name.charAt(0).toUpperCase();
+				}
+			}
+
+			// Update title
+			var titleSpan = row.querySelector('.process-title');
+			if (titleSpan && titleSpan.textContent !== proc.name) titleSpan.textContent = proc.name;
+
+			// Update CPU
+			var cpuCell = row.querySelector('.process-cpu');
+			if (cpuCell) {
+				cpuCell.textContent = proc.cpu + '%';
+				cpuCell.style.color = proc.cpu > 50 ? '#ff6b6b' : proc.cpu > 25 ? '#f0ad4e' : '';
+			}
+
+			// Update memory
+			var memCell = row.querySelector('.process-mem');
+			if (memCell) memCell.textContent = formatBytes(proc.mem);
+
+			// Update status
+			var statusCell = row.querySelector('.process-status');
+			if (statusCell) {
+				statusCell.className = 'process-status ' + (proc.status === 'minimized' ? 'minimized' : proc.status === 'not-responding' ? 'not-responding' : 'running');
+				statusCell.textContent = proc.status === 'minimized' ? 'Suspended' : proc.status === 'not-responding' ? 'Not Responding' : 'Running';
+			}
+		}
+
+		function bindProcessRowEvents(row, key) {
+			row.addEventListener('click', function() {
+				selectedKey = key;
+				document.getElementById('process-list').querySelectorAll('.process-row').forEach(function(r) { r.classList.remove('selected'); });
+				row.classList.add('selected');
+				updateToolbarButtons();
+			});
+
+			row.addEventListener('dblclick', function() {
+				try { window.parent.putwinontop('window' + key); } catch(e) {}
+			});
+
+			row.addEventListener('contextmenu', function(e) {
+				e.preventDefault();
+				selectedKey = key;
+				document.getElementById('process-list').querySelectorAll('.process-row').forEach(function(r) { r.classList.remove('selected'); });
+				row.classList.add('selected');
+				updateToolbarButtons();
+				var wins = parentWinds();
+				showContextMenu(e.clientX, e.clientY, key, wins[key] ? wins[key].title : 'Unknown');
+			});
+		}
+
+		// ── Column sorting ──
+		document.getElementById('process-header').addEventListener('click', function(e) {
+			var target = e.target.closest('[data-sort]');
+			if (!target) return;
+			var col = target.dataset.sort;
+			if (sortColumn === col) {
+				sortAsc = !sortAsc;
+			} else {
+				sortColumn = col;
+				sortAsc = col === 'name'; // name asc, others desc by default
+			}
+			// Update sort indicators
+			document.querySelectorAll('#process-header span').forEach(function(s) {
+				s.classList.remove('sorted-asc', 'sorted-desc');
+			});
+			target.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
+			refreshProcesses();
+		});
+
+		// ── Context menu ──
+		function showContextMenu(x, y, key, name) {
+			hideContextMenu();
+			ctxMenu = document.createElement('div');
+			ctxMenu.className = 'ctx-menu';
+
+			var items = [
+				{ label: '🔝 Bring to Front', action: function() { try { window.parent.putwinontop('window' + key); } catch(e) {} } },
+				{ label: '⬇️ Minimize', action: function() { try { window.parent.minim(key); } catch(e) {} } },
+				{ sep: true },
+				{ label: '❌ End Task', cls: 'danger', action: function() { endTask(key); } }
+			];
+
+			items.forEach(function(item) {
+				if (item.sep) {
+					var sep = document.createElement('div');
+					sep.className = 'ctx-menu-sep';
+					ctxMenu.appendChild(sep);
+					return;
+				}
+				var el = document.createElement('div');
+				el.className = 'ctx-menu-item' + (item.cls ? ' ' + item.cls : '');
+				el.textContent = item.label;
+				el.addEventListener('click', function() {
+					hideContextMenu();
+					item.action();
+					setTimeout(refreshProcesses, 150);
+				});
+				ctxMenu.appendChild(el);
+			});
+
+			// Position within viewport
+			document.body.appendChild(ctxMenu);
+			var rect = ctxMenu.getBoundingClientRect();
+			if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - 4;
+			if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - 4;
+			ctxMenu.style.left = x + 'px';
+			ctxMenu.style.top = y + 'px';
+		}
+
+		function hideContextMenu() {
+			if (ctxMenu && ctxMenu.parentNode) ctxMenu.parentNode.removeChild(ctxMenu);
+			ctxMenu = null;
+		}
+		document.addEventListener('click', hideContextMenu);
+
+		// ── End Task ──
+		function endTask(key) {
+			var wins = parentWinds();
+			var w = wins[key];
+			if (w) {
+				var appid = w.appid || '';
+				if (SYSTEM_APPS.indexOf(appid) !== -1) {
+					if (!confirm('"' + (w.title || appid) + '" is a system app. End task anyway?')) return;
+				}
+			}
+			try { window.parent.clwin(key); } catch(e) {}
+			heartbeatInjected.delete(key);
+			if (selectedKey === key) selectedKey = null;
+			// Force-kill fallback: if window still exists after 3s, remove from DOM
+			setTimeout(function() {
+				var pDoc = parentDoc();
+				if (pDoc) {
+					var winEl = pDoc.getElementById('window' + key);
+					if (winEl && winEl.parentNode) winEl.parentNode.removeChild(winEl);
+				}
+				try {
+					if (window.parent.winds && window.parent.winds[key]) delete window.parent.winds[key];
+				} catch(e) {}
+				refreshProcesses();
+			}, 3000);
+			setTimeout(refreshProcesses, 150);
+		}
+
+		// ── Toolbar buttons ──
+		function updateToolbarButtons() {
+			var hasSelection = selectedKey !== null;
+			document.getElementById('btn-end').disabled = !hasSelection;
+			document.getElementById('btn-restart').disabled = !hasSelection;
+		}
+
+		document.getElementById('btn-end').addEventListener('click', function() {
+			if (selectedKey) endTask(selectedKey);
+		});
+
+		document.getElementById('btn-restart').addEventListener('click', function() {
+			if (!selectedKey) return;
+			var wins = parentWinds();
+			var w = wins[selectedKey];
+			if (!w) return;
+			var appid = w.appid;
+			var title = w.title;
+			endTask(selectedKey);
+			// Re-open the app after a short delay
+			setTimeout(function() {
+				try {
+					if (typeof window.parent.openapp === 'function') {
+						window.parent.openapp(title || appid, appid);
+					}
+				} catch(e) {}
+			}, 300);
+		});
+
+		// ── Keyboard shortcuts ──
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Delete' && selectedKey) {
+				endTask(selectedKey);
+			}
+			if (e.key === 'F5') {
+				e.preventDefault();
+				refresh();
+			}
+		});
+
+		// ──────────────────────────────────────
+		// Performance Data Collection (runs every tick)
+		// ──────────────────────────────────────
+
+		var lastPerfData = { cpu: 0, memMB: 0, memPct: 0, memTotal: 0, memEstimated: false, winCount: 0, winPct: 0, domCount: 0, domPct: 0 };
+
+		function collectPerfData() {
+			var wins = parentWinds();
+			var winCount = Object.keys(wins).length;
+			var pDoc = parentDoc();
+
+			var cpu = estimateCpu();
+			pushSpark('cpu', cpu);
+
+			var memMB = 0, memPct = 0, memTotal = 0, memEstimated = false;
+			if (window.parent.performance && window.parent.performance.memory) {
+				memMB = Math.round(window.parent.performance.memory.usedJSHeapSize / 1048576);
+				memTotal = Math.round(window.parent.performance.memory.jsHeapSizeLimit / 1048576);
+				memPct = Math.round((memMB / memTotal) * 100);
+			} else {
+				memMB = winCount * 25 + Math.round(Math.random() * 10) + 60;
+				memPct = Math.min(90, Math.round(memMB / 512 * 100));
+				memEstimated = true;
+			}
+			pushSpark('mem', memPct);
+
+			var winPct = Math.min(100, winCount * 10);
+			pushSpark('win', winPct);
+
+			var domCount = 0;
+			if (pDoc) {
+				try { domCount = pDoc.querySelectorAll('*').length; } catch(e) {}
+			}
+			var domPct = Math.min(100, domCount / 50);
+			pushSpark('dom', domPct);
+
+			lastPerfData = { cpu: cpu, memMB: memMB, memPct: memPct, memTotal: memTotal, memEstimated: memEstimated, winCount: winCount, winPct: winPct, domCount: domCount, domPct: domPct };
+		}
+
+		// ──────────────────────────────────────
+		// Performance Tab (renders from collected data)
+		// ──────────────────────────────────────
+
+		function refreshPerformance() {
+			var d = lastPerfData;
+
+			document.getElementById('cpu-val').textContent = d.cpu + '%';
+			document.getElementById('cpu-bar').style.width = d.cpu + '%';
+			document.getElementById('cpu-sub').textContent = navigator.hardwareConcurrency + ' logical processors';
+			drawSparkline('cpu-spark', sparkHistory.cpu, 'rgb(97, 121, 255)');
+
+			document.getElementById('mem-val').textContent = d.memMB + ' MB';
+			document.getElementById('mem-bar').style.width = d.memPct + '%';
+			document.getElementById('mem-sub').textContent = d.memEstimated ? d.memMB + ' MB (estimated)' : d.memMB + ' MB / ' + d.memTotal + ' MB';
+			drawSparkline('mem-spark', sparkHistory.mem, 'rgb(107, 255, 142)');
+
+			document.getElementById('win-val').textContent = String(d.winCount);
+			document.getElementById('win-bar').style.width = d.winPct + '%';
+			document.getElementById('win-sub').textContent = d.winCount + ' window' + (d.winCount !== 1 ? 's' : '') + ' managed';
+			drawSparkline('win-spark', sparkHistory.win, 'rgb(240, 173, 78)');
+
+			document.getElementById('dom-val').textContent = d.domCount.toLocaleString();
+			document.getElementById('dom-bar').style.width = d.domPct + '%';
+			document.getElementById('dom-sub').textContent = 'In parent document';
+			drawSparkline('dom-spark', sparkHistory.dom, 'rgb(0, 188, 212)');
+
+			document.getElementById('stat-uptime').textContent = formatUptime(performance.now());
+			document.getElementById('stat-cores').textContent = String(navigator.hardwareConcurrency || '--');
+			document.getElementById('stat-fps').textContent = currentFps;
+		}
+
+		// ──────────────────────────────────────
+		// App History Tab
+		// ──────────────────────────────────────
+
+		function refreshHistory() {
+			updateAppHistory();
+			var list = document.getElementById('history-list');
+			var entries = Object.keys(appHistory);
+			list.innerHTML = '';
+
+			if (entries.length === 0) {
+				var empty = document.createElement('div');
+				empty.className = 'history-empty';
+				empty.textContent = 'No apps opened during this session yet.';
+				list.appendChild(empty);
+				return;
+			}
+
+			var now = Date.now();
+			entries.forEach(function(appid) {
+				var entry = appHistory[appid];
+				var totalMs = entry.totalMs;
+				if (entry.startedAt) totalMs += now - entry.startedAt;
+
+				var row = document.createElement('div');
+				row.className = 'history-row';
+
+				var nameCell = document.createElement('div');
+				nameCell.className = 'history-name';
+				var nameText = document.createElement('span');
+				nameText.textContent = entry.name;
+				nameCell.appendChild(nameText);
+
+				var timeCell = document.createElement('span');
+				timeCell.textContent = formatDuration(totalMs);
+
+				var opensCell = document.createElement('span');
+				opensCell.textContent = String(entry.opens) + 'x';
+
+				row.appendChild(nameCell);
+				row.appendChild(timeCell);
+				row.appendChild(opensCell);
+				list.appendChild(row);
+			});
+		}
+
+		// ──────────────────────────────────────
+		// Details Tab
+		// ──────────────────────────────────────
+
+		function refreshDetails() {
+			var wins = parentWinds();
+			var keys = Object.keys(wins);
+			var list = document.getElementById('details-list');
+			var pDoc = parentDoc();
+			list.innerHTML = '';
+
+			keys.forEach(function(key) {
+				var w = wins[key];
+				var row = document.createElement('div');
+				row.className = 'details-row';
+
+				// Name
+				var nameCell = document.createElement('span');
+				nameCell.textContent = w.title || 'Unknown';
+
+				// Window ID
+				var idCell = document.createElement('span');
+				idCell.className = 'detail-mono';
+				idCell.textContent = key.substring(0, 10) + '…';
+				idCell.title = key;
+
+				// Source
+				var srcCell = document.createElement('span');
+				srcCell.className = 'detail-mono';
+				var src = w.appid || '--';
+				srcCell.textContent = src.length > 15 ? src.substring(0, 15) + '…' : src;
+				srcCell.title = w.appid || '';
+
+				// Z-Index
+				var zCell = document.createElement('span');
+				zCell.textContent = String(w.zIndex || 0);
+
+				// DOM count of this window
+				var domCell = document.createElement('span');
+				var domCount = 0;
+				if (pDoc) {
+					var winEl = pDoc.getElementById('window' + key);
+					if (winEl) domCount = winEl.querySelectorAll('*').length;
+				}
+				domCell.textContent = String(domCount);
+
+				row.appendChild(nameCell);
+				row.appendChild(idCell);
+				row.appendChild(srcCell);
+				row.appendChild(zCell);
+				row.appendChild(domCell);
+				list.appendChild(row);
+			});
+		}
+
+		// ──────────────────────────────────────
+		// Refresh loop
+		// ──────────────────────────────────────
+
+		function refresh() {
+			var activeTab = document.querySelector('.tab.active');
+			var tabId = activeTab ? activeTab.dataset.tab : 'processes';
+
+			// Always collect perf data so sparklines stay continuous
+			collectPerfData();
+
+			// Always refresh processes list (lightweight with DOM diffing)
+			refreshProcesses();
+
+			switch (tabId) {
+				case 'performance': refreshPerformance(); break;
+				case 'history': refreshHistory(); break;
+				case 'details': refreshDetails(); break;
+			}
+		}
+
+		refresh();
+		setInterval(refresh, 2000);
+	})();
+	</script>
+</body>
+</html>
