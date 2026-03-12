@@ -618,13 +618,6 @@ function flwin(winElement) {
     const isFree = winds[winuid]["visualState"] != "fullscreen";
 
     if (isFree) {
-        // Save position before maximize
-        winds[winuid]._savedPos = {
-            left: winElement.style.left,
-            top: winElement.style.top,
-            width: winElement.style.width,
-            height: winElement.style.height
-        };
         maximizeWindow(winuid);
         flbtn.innerHTML = "close_fullscreen";
     } else {

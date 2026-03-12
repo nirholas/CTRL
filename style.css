@@ -167,16 +167,10 @@ nav [navobj] {
 	padding: 0px;
 	overflow: visible;
 	resize: none;
-	display: flex;
-	flex-direction: column;
 	gap: 0;
 	box-sizing: border-box;
 	will-change: transform, opacity;
-	/* Unfocused: solid bg, no blur */
-	background: var(--unfoc);
-	border: 1px solid var(--bd);
-	box-shadow: 3px 2px 12px var(--sd);
-	transition: var(--ease-decel) 200ms;
+	/* Glass, display, show/hide handled by Win12 section at bottom */
 }
 
 @media only screen and (max-width: 500px) {
@@ -2908,12 +2902,17 @@ dialog#nich {
 	border-color: var(--glass-border-col);
 }
 
-/* Title bar glass */
+/* Title bar glass — dims on unfocus (Win12 pattern) */
 .windowheader {
 	backdrop-filter: var(--blur-medium);
 	-webkit-backdrop-filter: var(--blur-medium);
 	background: var(--glass-bg) !important;
 	border-bottom: 1px solid var(--glass-border-col);
+	opacity: 0.5;
+	transition: opacity 150ms var(--ease-decel);
+}
+.window.windowontop > .windowheader {
+	opacity: 1;
 }
 
 /* ── Taskbar ── */
@@ -3218,18 +3217,6 @@ dialog.scalableui {
 /* Mica material on focused window */
 :root.mica .window.windowontop {
 	background: var(--mica);
-}
-
-/* ══════════════════════════════════════════════
-   Win12-Style Title Bar Focus/Unfocus
-   Unfocused windows dim their title bar like Win12
-   ══════════════════════════════════════════════ */
-.windowheader {
-	opacity: 0.5;
-	transition: opacity 150ms var(--ease-decel);
-}
-.window.windowontop > .windowheader {
-	opacity: 1;
 }
 
 /* ══════════════════════════════════════════════
