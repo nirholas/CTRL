@@ -1,10 +1,3 @@
-# CTRL
-The open-source, stable, fully-local web desktop system, made for every modern browser and device.
-
-```txt
-Version: 2.1
-Title: ctrl
-```
 
 <br>
 <h1>About</h1>
