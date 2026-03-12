@@ -1374,6 +1374,31 @@ codeblock {
 	aspect-ratio: 1 / 1;
 	overflow: visible;
 	border-radius: 6px;
+	position: relative;
+}
+
+/* Win12-style active indicator dot under running apps */
+.adock::after {
+	content: '';
+	position: absolute;
+	bottom: -3px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: var(--col-txt2, #aaa);
+	opacity: 0.6;
+	transition: width 0.2s, opacity 0.2s, background 0.2s;
+}
+
+/* Focused window gets a wider, brighter indicator */
+.adock.dock-focused::after {
+	width: 14px;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--col-bgh, #4CC2FF);
+	opacity: 1;
 }
 
 .adock .tooltiptext {

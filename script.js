@@ -691,6 +691,16 @@ function putwinontop(x) {
 	// Add focus class to the top window
 	focusedEl.classList.add('windowontop');
 	if (typeof updateFocusedWindowBorder === "function") updateFocusedWindowBorder();
+
+	// Update dock active indicator for focused window
+	var focusedWinuid = x.replace(/^window/, '');
+	document.querySelectorAll('#nowrunninapps .adock').forEach(function(el) {
+		if (el.getAttribute('winid') === focusedWinuid) {
+			el.classList.add('dock-focused');
+		} else {
+			el.classList.remove('dock-focused');
+		}
+	});
 }
 function isWinOnTop(x) {
 	const ourKey = x.replace(/^window/, '');
@@ -1143,7 +1153,6 @@ async function loadtaskspanel() {
 		appShortcutDiv.dataset.addedAt = performance.now();
 
 		appShortcutDiv.addEventListener("click", () => {
-			putwinontop('window' + wid);
 			minim(wid);
 		});
 

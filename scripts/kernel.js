@@ -604,6 +604,9 @@ function minim(winuid) {
             x.classList.remove('notrans');
             x.classList.add('min');
             nowapp = '';
+            // Clear dock focused indicator
+            var dockEl = document.querySelector('#nowrunninapps .adock[winid="' + winuid + '"]');
+            if (dockEl) dockEl.classList.remove('dock-focused');
         } else {
             // Not on top — just focus it
             putwinontop('window' + winuid);
