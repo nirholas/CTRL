@@ -6,12 +6,12 @@ CTRL is a collection of features, including apps, themes, permission systems, an
 
 ## Key features
 - CTRL is a **mobile friendly**, **fully local and offline** web system with a **web desktop** packaged as a PWA.
-- CTRL is **Open-Source** (under GPL v3).
+- CTRL's source is available in this repository (see the [LICENSE](LICENSE) file for terms).
 - It has a codebase built entirely on pure **HTML, vanilla JavaScript, and CSS** making it very reliable and private, as it can function fully offline, thanks to its local-first nature.
 - A suite of default applications to ease your work. There's also a store where you can install even more applications!
 - CTRL is designed for the user. The system focuses on giving a stable environment that a user needs. Maintaining simplicity and efficiency in UI. No flashy effects or extensive animations.
 ## Run it.
-[https://x/](https://x/).
+[https://ctrl.best/](https://ctrl.best/).
 > If you are on mobiles, CTRL Mobile Mode works well as a PWA. Learn How To Install [here](https://ctrl.gitbook.io/main/get-started/access-ctrl#installing-ctrl-as-an-app-in-chrome).
 
 # Resources
