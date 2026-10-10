@@ -1,0 +1,25 @@
+# CTRL
+
+> Web system designed for any modern device with a browser. CTRL apps can perform complex tasks more easily than native apps by simulating an abstract virtual system within the browser.
+
+CTRL is an open-source repository by nirholas, part of the three.ws ecosystem.
+
+## Docs
+
+- [README](https://github.com/nirholas/CTRL/blob/HEAD/README.md): install, usage and reference
+- [Key features](https://github.com/nirholas/CTRL/blob/HEAD/README.md#key-features)
+- [Run it.](https://github.com/nirholas/CTRL/blob/HEAD/README.md#run-it)
+- [Making CTRL Apps](https://github.com/nirholas/CTRL/blob/HEAD/README.md#making-ctrl-apps)
+- [Let's Connect!](https://github.com/nirholas/CTRL/blob/HEAD/README.md#lets-connect)
+- [Documentation](https://github.com/nirholas/CTRL/blob/HEAD/README.md#documentation)
+- [AGENTS.md](https://github.com/nirholas/CTRL/blob/HEAD/AGENTS.md): guidance for coding agents
+- [Full text for LLMs](https://github.com/nirholas/CTRL/blob/HEAD/llms-full.txt): the README inlined
+
+## Project
+
+- [Source](https://github.com/nirholas/CTRL)
+- [Issues](https://github.com/nirholas/CTRL/issues)
+- [Discussions](https://github.com/nirholas/CTRL/discussions)
+- [Homepage](https://ctrl.best)
+- [three.ws](https://three.ws): the platform this is part of
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme)
